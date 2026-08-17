@@ -99,12 +99,12 @@ declare module '$env/static/private' {
 	export const ANDROID_NDK_HOME: string;
 	export const GIT_ASKPASS: string;
 	export const VSCODE_GIT_ASKPASS_NODE: string;
+	export const VITE_TYPE: string;
 	export const OSLogRateLimit: string;
 	export const npm_package_config_commitizen_useEmoji: string;
 	export const COLORTERM: string;
 	export const npm_node_execpath: string;
 	export const NODE_ENV: string;
-	export const VITE_IS_DEV: string;
 }
 
 /**
@@ -252,12 +252,12 @@ declare module '$env/dynamic/private' {
 		ANDROID_NDK_HOME: string;
 		GIT_ASKPASS: string;
 		VSCODE_GIT_ASKPASS_NODE: string;
+		VITE_TYPE: string;
 		OSLogRateLimit: string;
 		npm_package_config_commitizen_useEmoji: string;
 		COLORTERM: string;
 		npm_node_execpath: string;
 		NODE_ENV: string;
-		VITE_IS_DEV: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;
 	}

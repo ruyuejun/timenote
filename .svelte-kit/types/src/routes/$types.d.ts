@@ -11,7 +11,7 @@ type EnsureDefined<T> = T extends null | undefined ? {} : T;
 type OptionalUnion<U extends Record<string, any>, A extends keyof U = U extends U ? keyof U : never> = U extends unknown ? { [P in Exclude<A, keyof U>]?: never } & U : never;
 export type Snapshot<T = any> = Kit.Snapshot<T>;
 type PageParentData = EnsureDefined<LayoutData>;
-type LayoutRouteId = RouteId | "/" | "/analytics" | "/dashboard" | "/database/backup" | "/database/restore" | "/docs/api" | "/docs/changelog" | "/docs/guide" | "/login" | "/notify" | "/orders/export" | "/orders/list" | "/orders/return" | "/plugins/installed" | "/plugins/market" | "/security" | "/settings" | "/users/list" | "/users/logs" | "/users/roles" | null
+type LayoutRouteId = RouteId | "/" | null
 type LayoutParams = RouteParams & {  }
 type LayoutParentData = EnsureDefined<{}>;
 
@@ -21,7 +21,7 @@ export type PageLoadEvent = Parameters<PageLoad>[0];
 export type PageData = Expand<Omit<PageParentData, keyof unknown> & OptionalUnion<EnsureDefined<unknown>>>;
 export type PageProps = { params: RouteParams; data: PageData }
 export type LayoutServerData = null;
-export type LayoutLoad<OutputData extends OutputDataShape<LayoutParentData> = OutputDataShape<LayoutParentData>> = Kit.Load<LayoutParams, LayoutServerData, LayoutParentData, OutputData, LayoutRouteId>;
+export type LayoutLoad<OutputData extends Partial<App.PageData> & Record<string, any> | void = Partial<App.PageData> & Record<string, any> | void> = Kit.Load<LayoutParams, LayoutServerData, LayoutParentData, OutputData, LayoutRouteId>;
 export type LayoutLoadEvent = Parameters<LayoutLoad>[0];
 export type LayoutData = Expand<Omit<LayoutParentData, keyof unknown> & OptionalUnion<EnsureDefined<unknown>>>;
 export type LayoutProps = { params: LayoutParams; data: LayoutData; children: import("svelte").Snippet }

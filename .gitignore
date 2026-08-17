@@ -33,6 +33,8 @@ yarn-lock.json
 package-lock.json
 .pnpm-store
 
+.svelte-kit
+
 # bun
 **/*.bun
 bun.lockb

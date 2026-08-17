@@ -11,51 +11,13 @@ export { matchers } from './matchers.js';
 export const nodes = [
 	() => import('./nodes/0'),
 	() => import('./nodes/1'),
-	() => import('./nodes/2'),
-	() => import('./nodes/3'),
-	() => import('./nodes/4'),
-	() => import('./nodes/5'),
-	() => import('./nodes/6'),
-	() => import('./nodes/7'),
-	() => import('./nodes/8'),
-	() => import('./nodes/9'),
-	() => import('./nodes/10'),
-	() => import('./nodes/11'),
-	() => import('./nodes/12'),
-	() => import('./nodes/13'),
-	() => import('./nodes/14'),
-	() => import('./nodes/15'),
-	() => import('./nodes/16'),
-	() => import('./nodes/17'),
-	() => import('./nodes/18'),
-	() => import('./nodes/19'),
-	() => import('./nodes/20'),
-	() => import('./nodes/21')
+	() => import('./nodes/2')
 ];
 
 export const server_loads = [];
 
 export const dictionary = {
-		"/": [2],
-		"/analytics": [3],
-		"/dashboard": [4],
-		"/database/backup": [5],
-		"/database/restore": [6],
-		"/docs/api": [7],
-		"/docs/changelog": [8],
-		"/docs/guide": [9],
-		"/login": [10],
-		"/notify": [11],
-		"/orders/export": [12],
-		"/orders/list": [13],
-		"/orders/return": [14],
-		"/plugins/installed": [15],
-		"/plugins/market": [16],
-		"/security": [17],
-		"/settings": [18],
-		"/users/list": [19],
-		"/users/logs": [20],
-		"/users/roles": [21]
+		"/": [2]
 	};
 
 export const hooks = {
