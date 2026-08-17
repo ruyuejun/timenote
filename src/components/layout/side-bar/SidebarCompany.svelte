@@ -69,7 +69,8 @@
                 </button>
 
                 {#if companyPickerOpen}
-                    <div class="absolute bottom-7 right-0 z-50 w-44 rounded-lg border border-ink-200 bg-white shadow-lg">
+                    <div
+                        class="absolute bottom-7 right-0 z-50 w-44 rounded-lg border border-ink-200 bg-white shadow-lg">
                         <div class="p-2">
                             <p class="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wide text-ink-400">
                                 选择默认公司

@@ -18,7 +18,11 @@
 <div class="app-bg"></div>
 
 <div class="relative z-10 flex min-h-screen">
-    <Sidebar {mobileOpen} {collapsed} onNavigate={() => (mobileOpen = false)} />
+    <Sidebar
+        {mobileOpen}
+        {collapsed}
+        onNavigate={() => (mobileOpen = false)}
+        onToggleCollapse={() => (collapsed = !collapsed)} />
 
     {#if mobileOpen}
         <button
@@ -30,7 +34,7 @@
     {/if}
 
     <div class="flex min-w-0 flex-1 flex-col">
-        <Header onMenuClick={() => (mobileOpen = true)} {collapsed} onToggleCollapse={() => (collapsed = !collapsed)} />
+        <Header onMenuClick={() => (mobileOpen = true)} />
 
         <main class="flex-1 px-6 py-5">
             {@render children()}

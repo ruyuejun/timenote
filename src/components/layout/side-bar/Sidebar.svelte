@@ -8,9 +8,10 @@
         mobileOpen: boolean
         collapsed: boolean
         onNavigate: () => void
+        onToggleCollapse: () => void
     }
 
-    let { mobileOpen, collapsed, onNavigate }: Props = $props()
+    let { mobileOpen, collapsed, onNavigate, onToggleCollapse }: Props = $props()
 </script>
 
 <aside
@@ -20,7 +21,7 @@
         collapsed ? 'w-14' : 'w-55',
         mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
     )}>
-    <SidebarTop {collapsed} />
+    <SidebarTop {collapsed} {onToggleCollapse} />
     <SidebarNav {mobileOpen} {collapsed} />
     <SidebarCompany {collapsed} />
 </aside>

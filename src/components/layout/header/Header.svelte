@@ -1,15 +1,13 @@
 <script lang="ts">
-    import { Bell, Search, Settings, LogOut, User, Palette, Menu, PanelLeftClose, PanelLeftOpen } from '@lucide/svelte'
+    import { Bell, Search, Settings, LogOut, User, Palette, Menu } from '@lucide/svelte'
     import { theme, type Theme } from '@/stores/theme'
     import { cn } from '@/utils/clsx'
 
     interface Props {
         onMenuClick: () => void
-        collapsed: boolean
-        onToggleCollapse: () => void
     }
 
-    let { onMenuClick, collapsed, onToggleCollapse }: Props = $props()
+    let { onMenuClick }: Props = $props()
 
     const notifications = [
         {
@@ -74,24 +72,11 @@
         }
     }} />
 
-<header class="header-shell sticky top-0 z-30 flex-shrink-0">
+<header class="header-shell sticky top-0 z-30 shrink-0">
     <!-- Row 1: L3 tabs + Actions -->
     <div class="header-row1">
         <!-- Left: collapse toggle + hamburger + L3 tabs -->
         <div class="flex min-w-0 flex-1 items-center gap-1">
-            <button
-                type="button"
-                onclick={onToggleCollapse}
-                class="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-600 transition-colors hover:bg-white/50 lg:flex"
-                aria-label={collapsed ? '展开菜单' : '折叠菜单'}
-                title={collapsed ? '展开菜单' : '折叠菜单'}>
-                {#if collapsed}
-                    <PanelLeftOpen class="h-[18px] w-[18px]" strokeWidth={1.8} />
-                {:else}
-                    <PanelLeftClose class="h-[18px] w-[18px]" strokeWidth={1.8} />
-                {/if}
-            </button>
-
             <button
                 type="button"
                 onclick={onMenuClick}
@@ -222,7 +207,7 @@
                     }}
                     class="flex items-center gap-2 rounded-lg py-1 pl-1 pr-2.5 transition-colors hover:bg-white/60">
                     <span
-                        class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-400 text-[12px] font-bold text-white">
+                        class="flex h-7 w-7 items-center justify-center rounded-full bg-linear-to-br from-brand-500 to-brand-400 text-[12px] font-bold text-white">
                         苏
                     </span>
                     <span class="hidden flex-col items-start leading-tight sm:flex">
