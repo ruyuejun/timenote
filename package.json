@@ -8,13 +8,15 @@
     "type": "module",
     "main": "dist-electron/main/index.js",
     "scripts": {
-        "dev": "vite",
-        "dev:h5": "VITE_TYPE=h5 vite",
+        "dev": "vite dev",
+        "dev:h5": "VITE_TYPE=h5 vite dev",
         "build": "vite build",
         "build:h5": "VITE_TYPE=h5 vite build",
         "commit": "git add . && cz",
         "pull": "git pull",
         "push": "git push",
+        "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+        "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
         "lint": "oxlint",
         "lint:fix": "oxlint --fix",
         "format": "oxfmt",
@@ -24,10 +26,23 @@
         "prepare": "lefthook install -f"
     },
     "dependencies": {
-        "sass": "^1.102.0"
+        "@lucide/svelte": "^1.31.0",
+        "@tiptap/core": "^3.30.0",
+        "@tiptap/extension-bubble-menu": "^3.30.0",
+        "@tiptap/extension-image": "^3.30.0",
+        "@tiptap/extension-link": "^3.30.0",
+        "@tiptap/extension-placeholder": "^3.30.0",
+        "@tiptap/extension-text-align": "^3.30.0",
+        "@tiptap/extension-underline": "^3.30.0",
+        "@tiptap/pm": "^3.30.0",
+        "@tiptap/starter-kit": "^3.30.0",
+        "sass": "^1.102.0",
+        "tailwind-merge": "^3.6.0"
     },
     "devDependencies": {
         "@playwright/test": "^1.62.1",
+        "@sveltejs/adapter-auto": "^3.3.1",
+        "@sveltejs/kit": "^2.70.2",
         "@sveltejs/vite-plugin-svelte": "^7.3.0",
         "@tailwindcss/vite": "^4.3.3",
         "@tsconfig/svelte": "^5.0.8",
