@@ -19,5 +19,6 @@ interface Window {
         }
         openDirectoryDialog: () => Promise<string | null>
         readDirectory: (dirPath: string) => Promise<FileSystemItem[]>
+        readFile: (filePath: string) => Promise<string>
     }
 }

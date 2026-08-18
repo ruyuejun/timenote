@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { goto } from '$app/navigation'
+    import Editor from '@/components/editor/Editor.svelte'
 </script>
 
-<svelte:component this={null} />
+<div class="h-full">
+    <Editor />
+</div>

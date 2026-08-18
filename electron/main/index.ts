@@ -164,3 +164,16 @@ ipcMain.handle('read-directory', async (_, dirPath: string) => {
         return []
     }
 })
+
+// Read file content
+ipcMain.handle('read-file', async (_, filePath: string) => {
+    const fs = await import('fs/promises')
+    
+    try {
+        const content = await fs.readFile(filePath, 'utf-8')
+        return content
+    } catch (error) {
+        console.error('Error reading file:', error)
+        throw error
+    }
+})

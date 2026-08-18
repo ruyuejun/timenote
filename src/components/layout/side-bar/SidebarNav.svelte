@@ -1,5 +1,6 @@
 <script lang="ts">
     import { cn } from '@/utils/clsx'
+    import { editorStore } from '@/stores/editor'
     import {
         BookText,
         FolderPlus,
@@ -98,6 +99,17 @@
             return await window.electronAPI.readDirectory(folderPath)
         }
         return []
+    }
+
+    async function handleFileClick(filePath: string) {
+        if (typeof window !== 'undefined' && window.electronAPI) {
+            try {
+                const content = await window.electronAPI.readFile(filePath)
+                editorStore.setFile(filePath, content)
+            } catch (error) {
+                console.error('Error reading file:', error)
+            }
+        }
     }
 
     function getDirectoryName(path: string): string {
@@ -330,6 +342,7 @@
                                                                                                 deepItem.isDirectory
                                                                                             )}
                                                                                         <button
+                                                                                            onclick={() => !deepItem.isDirectory && handleFileClick(deepItem.path)}
                                                                                             class={cn(
                                                                                                 'group flex w-full items-center gap-2 rounded-lg px-2 py-1 text-[11px] transition-all duration-150',
                                                                                                 'text-ink-600 hover:bg-white/30 hover:text-ink-900'
@@ -354,6 +367,7 @@
                                                                             subItem.isDirectory
                                                                         )}
                                                                         <button
+                                                                            onclick={() => handleFileClick(subItem.path)}
                                                                             class={cn(
                                                                                 'group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[11.5px] transition-all duration-150',
                                                                                 'text-ink-600 hover:bg-white/30 hover:text-ink-900'
@@ -375,6 +389,7 @@
                                                 {:else}
                                                     {@const IconComponent = getFileIcon(item.name, item.isDirectory)}
                                                     <button
+                                                        onclick={() => handleFileClick(item.path)}
                                                         class={cn(
                                                             'group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[12px] transition-all duration-150',
                                                             'text-ink-600 hover:bg-white/30 hover:text-ink-900'

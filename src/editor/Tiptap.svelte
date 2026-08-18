@@ -48,6 +48,13 @@
 		editor = null;
 	});
 
+	// 监听 content 变化，更新编辑器内容
+	$effect(() => {
+		if (editor && content !== editor.getHTML()) {
+			editor.commands.setContent(content);
+		}
+	});
+
 	// ---------- 辅助方法 ----------
 	const toggleBold = () => {
 		editor?.chain().focus().toggleBold().run();

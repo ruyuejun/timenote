@@ -1,35 +1,9 @@
 import { ipcRenderer, contextBridge } from 'electron'
+import { initElectronApi } from './ElectronApi'
+import { initIpcRenderer } from './IpcRenderer'
 
-contextBridge.exposeInMainWorld('electronAPI', {
-    platform: process.platform,
-    versions: {
-        node: process.versions.node,
-        chrome: process.versions.chrome,
-        electron: process.versions.electron,
-    },
-    openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog'),
-    readDirectory: (dirPath: string) => ipcRenderer.invoke('read-directory', dirPath),
-})
-
-// --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', {
-    on(...args: Parameters<typeof ipcRenderer.on>) {
-        const [channel, listener] = args
-        return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
-    },
-    off(...args: Parameters<typeof ipcRenderer.off>) {
-        const [channel, ...omit] = args
-        return ipcRenderer.off(channel, ...omit)
-    },
-    send(...args: Parameters<typeof ipcRenderer.send>) {
-        const [channel, ...omit] = args
-        return ipcRenderer.send(channel, ...omit)
-    },
-    invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-        const [channel, ...omit] = args
-        return ipcRenderer.invoke(channel, ...omit)
-    },
-})
+initElectronApi()
+initIpcRenderer()
 
 // --------- Preload scripts loading ---------
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
