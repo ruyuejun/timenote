@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
         chrome: process.versions.chrome,
         electron: process.versions.electron,
     },
+    openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog'),
+    readDirectory: (dirPath: string) => ipcRenderer.invoke('read-directory', dirPath),
 })
 
 // --------- Expose some API to the Renderer process ---------

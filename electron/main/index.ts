@@ -117,3 +117,50 @@ ipcMain.handle('open-win', (_, arg) => {
         childWindow.loadFile(indexHtml, { hash: arg })
     }
 })
+
+// Open directory dialog
+ipcMain.handle('open-directory-dialog', async () => {
+    const { dialog } = await import('electron')
+    const result = await dialog.showOpenDialog({
+        properties: ['openDirectory']
+    })
+    
+    if (result.canceled || result.filePaths.length === 0) {
+        return null
+    }
+    
+    return result.filePaths[0]
+})
+
+// Read directory contents
+ipcMain.handle('read-directory', async (_, dirPath: string) => {
+    const fs = await import('fs/promises')
+    const path = await import('path')
+    
+    try {
+        const entries = await fs.readdir(dirPath, { withFileTypes: true })
+        const items = await Promise.all(
+            entries.map(async (entry) => {
+                const fullPath = path.join(dirPath, entry.name)
+                const stats = await fs.stat(fullPath)
+                
+                return {
+                    name: entry.name,
+                    path: fullPath,
+                    isDirectory: entry.isDirectory(),
+                    size: stats.size,
+                    modified: stats.mtime.getTime()
+                }
+            })
+        )
+        
+        return items.sort((a, b) => {
+            if (a.isDirectory && !b.isDirectory) return -1
+            if (!a.isDirectory && b.isDirectory) return 1
+            return a.name.localeCompare(b.name)
+        })
+    } catch (error) {
+        console.error('Error reading directory:', error)
+        return []
+    }
+})

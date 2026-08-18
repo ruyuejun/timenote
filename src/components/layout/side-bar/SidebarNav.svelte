@@ -1,6 +1,17 @@
 <script lang="ts">
     import { cn } from '@/utils/clsx'
-    import { Icon } from '@lucide/svelte'
+    import {
+        BookText,
+        FolderPlus,
+        ChevronDown,
+        ChevronRight,
+        Folder,
+        FolderOpen,
+        FileText,
+        FileSpreadsheet,
+        Presentation,
+        File,
+    } from '@lucide/svelte'
 
     interface Props {
         mobileOpen: boolean
@@ -8,7 +19,143 @@
         onNavigate?: () => void
     }
 
+    interface FileSystemItem {
+        name: string
+        path: string
+        isDirectory: boolean
+        size: number
+        modified: number
+    }
+
+    interface DirectoryNode {
+        path: string
+        name: string
+        expanded: boolean
+        children?: FileSystemItem[]
+        childrenLoaded: boolean
+    }
+
     let { mobileOpen, collapsed, onNavigate }: Props = $props()
+
+    let localSpaceExpanded = $state(true)
+    let directories = $state<Map<string, DirectoryNode>>(new Map())
+    let expandedFolders = $state<Set<string>>(new Set())
+
+    function toggleLocalSpace() {
+        localSpaceExpanded = !localSpaceExpanded
+    }
+
+    async function handleAddDirectory() {
+        if (typeof window !== 'undefined' && window.electronAPI) {
+            const dirPath = await window.electronAPI.openDirectoryDialog()
+            if (dirPath && !directories.has(dirPath)) {
+                const name = getDirectoryName(dirPath)
+                directories.set(dirPath, {
+                    path: dirPath,
+                    name,
+                    expanded: false,
+                    childrenLoaded: false,
+                })
+                directories = new Map(directories)
+            }
+        }
+    }
+
+    async function toggleDirectory(dirPath: string) {
+        const dir = directories.get(dirPath)
+        if (!dir) return
+
+        const newExpanded = !dir.expanded
+        let children = dir.children
+        let childrenLoaded = dir.childrenLoaded
+
+        if (newExpanded && !childrenLoaded) {
+            const items = await window.electronAPI.readDirectory(dirPath)
+            children = items
+            childrenLoaded = true
+        }
+
+        directories.set(dirPath, {
+            ...dir,
+            expanded: newExpanded,
+            children,
+            childrenLoaded
+        })
+        directories = new Map(directories)
+    }
+
+    async function toggleFolder(folderPath: string) {
+        if (expandedFolders.has(folderPath)) {
+            expandedFolders.delete(folderPath)
+        } else {
+            expandedFolders.add(folderPath)
+        }
+        expandedFolders = new Set(expandedFolders)
+    }
+
+    async function loadFolderContents(folderPath: string): Promise<FileSystemItem[]> {
+        if (typeof window !== 'undefined' && window.electronAPI) {
+            return await window.electronAPI.readDirectory(folderPath)
+        }
+        return []
+    }
+
+    function getDirectoryName(path: string): string {
+        return path.split('/').pop() || path.split('\\').pop() || path
+    }
+
+    function getFileIcon(filename: string, isDirectory: boolean) {
+        if (isDirectory) {
+            return Folder
+        }
+
+        const ext = filename.split('.').pop()?.toLowerCase()
+
+        switch (ext) {
+            case 'md':
+            case 'txt':
+            case 'doc':
+            case 'docx':
+                return FileText
+            case 'xls':
+            case 'xlsx':
+            case 'csv':
+                return FileSpreadsheet
+            case 'ppt':
+            case 'pptx':
+                return Presentation
+            default:
+                return File
+        }
+    }
+
+    interface FolderState {
+        expanded: boolean
+        children?: FileSystemItem[]
+        loaded: boolean
+    }
+
+    let folderStates = $state<Map<string, FolderState>>(new Map())
+
+    async function toggleNestedFolder(folderPath: string) {
+        const state = folderStates.get(folderPath) || { expanded: false, loaded: false }
+        
+        const newExpanded = !state.expanded
+        let children = state.children
+        let loaded = state.loaded
+        
+        if (newExpanded && !loaded) {
+            children = await loadFolderContents(folderPath)
+            loaded = true
+        }
+        
+        folderStates.set(folderPath, {
+            expanded: newExpanded,
+            children,
+            loaded
+        })
+        folderStates = new Map(folderStates)
+    }
 </script>
 
 <!-- Nav groups -->
@@ -28,25 +175,227 @@
                     class={cn(
                         'group relative flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-150'
                     )}>
-                    <Icon class={cn('h-4.5 w-4.5')} strokeWidth={1.6} />
+                    <BookText class={cn('h-4.5 w-4.5')} strokeWidth={1.6} />
                     <span
                         class="pointer-events-none absolute left-12 z-50 hidden whitespace-nowrap rounded-lg bg-ink-900/90 px-2.5 py-1.5 text-[11.5px] font-medium text-white shadow-lg group-hover:block">
                         {'本地空间'}
                     </span>
                 </button>
             {:else}
-                <button
-                    onclick={onNavigate}
-                    title={'本地空间'}
-                    class={cn(
-                        'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-150',
-                        'text-ink-600 hover:bg-white/30 hover:text-ink-900'
-                    )}>
-                    <Icon
-                        class={cn('h-4.5 w-4.5 shrink-0', 'text-ink-500 group-hover:text-ink-700')}
-                        strokeWidth={1.6} />
-                    <span class="flex-1 truncate">{'本地空间'}</span>
-                </button>
+                <div class="space-y-1">
+                    <div
+                        class={cn(
+                            'group relative flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-150',
+                            'text-ink-600 hover:bg-white/30'
+                        )}>
+                        <BookText class={cn('h-4.5 w-4.5 shrink-0', 'text-ink-500')} strokeWidth={1.6} />
+                        <span class="flex-1 truncate">{'本地空间'}</span>
+                        <button
+                            onclick={handleAddDirectory}
+                            title="添加本地目录"
+                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-ink-500 transition-colors hover:bg-white/50 hover:text-ink-700">
+                            <FolderPlus class="h-4 w-4" strokeWidth={1.8} />
+                        </button>
+                        <button
+                            onclick={toggleLocalSpace}
+                            title={localSpaceExpanded ? '收起' : '展开'}
+                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-ink-500 transition-colors hover:bg-white/50 hover:text-ink-700">
+                            {#if localSpaceExpanded}
+                                <ChevronDown class="h-4 w-4" strokeWidth={1.8} />
+                            {:else}
+                                <ChevronRight class="h-4 w-4" strokeWidth={1.8} />
+                            {/if}
+                        </button>
+                    </div>
+
+                    {#if localSpaceExpanded && directories.size > 0}
+                        <div class="ml-3 space-y-0.5 border-l border-ink-200 pl-3">
+                            {#each Array.from(directories.values()) as directory}
+                                <div class="space-y-0.5">
+                                    <button
+                                        onclick={() => toggleDirectory(directory.path)}
+                                        class={cn(
+                                            'group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12.5px] transition-all duration-150',
+                                            'text-ink-600 hover:bg-white/30 hover:text-ink-900'
+                                        )}>
+                                        {#if directory.expanded}
+                                            <FolderOpen
+                                                class={cn('h-4 w-4 shrink-0', 'text-ink-400 group-hover:text-ink-600')}
+                                                strokeWidth={1.6} />
+                                        {:else}
+                                            <Folder
+                                                class={cn('h-4 w-4 shrink-0', 'text-ink-400 group-hover:text-ink-600')}
+                                                strokeWidth={1.6} />
+                                        {/if}
+                                        <span class="flex-1 truncate text-left">{directory.name}</span>
+                                        {#if directory.expanded}
+                                            <ChevronDown class="h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
+                                        {:else}
+                                            <ChevronRight class="h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
+                                        {/if}
+                                    </button>
+
+                                    {#if directory.expanded && directory.children}
+                                        <div class="ml-4 space-y-0.5 border-l border-ink-200 pl-2">
+                                            {#each directory.children as item}
+                                                {#if item.isDirectory}
+                                                    {@const folderState = folderStates.get(item.path) || {
+                                                        expanded: false,
+                                                        loaded: false,
+                                                    }}
+                                                    <div class="space-y-0.5">
+                                                        <button
+                                                            onclick={() => toggleNestedFolder(item.path)}
+                                                            class={cn(
+                                                                'group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[12px] transition-all duration-150',
+                                                                'text-ink-600 hover:bg-white/30 hover:text-ink-900'
+                                                            )}>
+                                                            {#if folderState.expanded}
+                                                                <FolderOpen
+                                                                    class={cn(
+                                                                        'h-3.5 w-3.5 shrink-0',
+                                                                        'text-ink-400 group-hover:text-ink-600'
+                                                                    )}
+                                                                    strokeWidth={1.6} />
+                                                            {:else}
+                                                                <Folder
+                                                                    class={cn(
+                                                                        'h-3.5 w-3.5 shrink-0',
+                                                                        'text-ink-400 group-hover:text-ink-600'
+                                                                    )}
+                                                                    strokeWidth={1.6} />
+                                                            {/if}
+                                                            <span class="flex-1 truncate text-left">{item.name}</span>
+                                                            {#if folderState.expanded}
+                                                                <ChevronDown
+                                                                    class="h-3 w-3 shrink-0 text-ink-400"
+                                                                    strokeWidth={2} />
+                                                            {:else}
+                                                                <ChevronRight
+                                                                    class="h-3 w-3 shrink-0 text-ink-400"
+                                                                    strokeWidth={2} />
+                                                            {/if}
+                                                        </button>
+
+                                                        {#if folderState.expanded && folderState.children}
+                                                            <div class="ml-4 space-y-0.5 border-l border-ink-200 pl-2">
+                                                                {#each folderState.children as subItem}
+                                                                    {#if subItem.isDirectory}
+                                                                        {@const subFolderState = folderStates.get(
+                                                                            subItem.path
+                                                                        ) || { expanded: false, loaded: false }}
+                                                                        <div class="space-y-0.5">
+                                                                            <button
+                                                                                onclick={() =>
+                                                                                    toggleNestedFolder(subItem.path)}
+                                                                                class={cn(
+                                                                                    'group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[11.5px] transition-all duration-150',
+                                                                                    'text-ink-600 hover:bg-white/30 hover:text-ink-900'
+                                                                                )}>
+                                                                                {#if subFolderState.expanded}
+                                                                                    <FolderOpen
+                                                                                        class={cn(
+                                                                                            'h-3 w-3 shrink-0',
+                                                                                            'text-ink-400 group-hover:text-ink-600'
+                                                                                        )}
+                                                                                        strokeWidth={1.6} />
+                                                                                {:else}
+                                                                                    <Folder
+                                                                                        class={cn(
+                                                                                            'h-3 w-3 shrink-0',
+                                                                                            'text-ink-400 group-hover:text-ink-600'
+                                                                                        )}
+                                                                                        strokeWidth={1.6} />
+                                                                                {/if}
+                                                                                <span class="flex-1 truncate text-left"
+                                                                                    >{subItem.name}</span>
+                                                                                {#if subFolderState.expanded}
+                                                                                    <ChevronDown
+                                                                                        class="h-3 w-3 shrink-0 text-ink-400"
+                                                                                        strokeWidth={2} />
+                                                                                {:else}
+                                                                                    <ChevronRight
+                                                                                        class="h-3 w-3 shrink-0 text-ink-400"
+                                                                                        strokeWidth={2} />
+                                                                                {/if}
+                                                                            </button>
+
+                                                                            {#if subFolderState.expanded && subFolderState.children}
+                                                                                <div
+                                                                                    class="ml-4 space-y-0.5 border-l border-ink-200 pl-2">
+                                                                                    {#each subFolderState.children as deepItem}
+                                                                                        {@const IconComponent =
+                                                                                            getFileIcon(
+                                                                                                deepItem.name,
+                                                                                                deepItem.isDirectory
+                                                                                            )}
+                                                                                        <button
+                                                                                            class={cn(
+                                                                                                'group flex w-full items-center gap-2 rounded-lg px-2 py-1 text-[11px] transition-all duration-150',
+                                                                                                'text-ink-600 hover:bg-white/30 hover:text-ink-900'
+                                                                                            )}>
+                                                                                            <IconComponent
+                                                                                                class={cn(
+                                                                                                    'h-3 w-3 shrink-0',
+                                                                                                    'text-ink-400 group-hover:text-ink-600'
+                                                                                                )}
+                                                                                                strokeWidth={1.6} />
+                                                                                            <span
+                                                                                                class="flex-1 truncate text-left"
+                                                                                                >{deepItem.name}</span>
+                                                                                        </button>
+                                                                                    {/each}
+                                                                                </div>
+                                                                            {/if}
+                                                                        </div>
+                                                                    {:else}
+                                                                        {@const IconComponent = getFileIcon(
+                                                                            subItem.name,
+                                                                            subItem.isDirectory
+                                                                        )}
+                                                                        <button
+                                                                            class={cn(
+                                                                                'group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[11.5px] transition-all duration-150',
+                                                                                'text-ink-600 hover:bg-white/30 hover:text-ink-900'
+                                                                            )}>
+                                                                            <IconComponent
+                                                                                class={cn(
+                                                                                    'h-3 w-3 shrink-0',
+                                                                                    'text-ink-400 group-hover:text-ink-600'
+                                                                                )}
+                                                                                strokeWidth={1.6} />
+                                                                            <span class="flex-1 truncate text-left"
+                                                                                >{subItem.name}</span>
+                                                                        </button>
+                                                                    {/if}
+                                                                {/each}
+                                                            </div>
+                                                        {/if}
+                                                    </div>
+                                                {:else}
+                                                    {@const IconComponent = getFileIcon(item.name, item.isDirectory)}
+                                                    <button
+                                                        class={cn(
+                                                            'group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-[12px] transition-all duration-150',
+                                                            'text-ink-600 hover:bg-white/30 hover:text-ink-900'
+                                                        )}>
+                                                        <IconComponent
+                                                            class={cn(
+                                                                'h-3.5 w-3.5 shrink-0',
+                                                                'text-ink-400 group-hover:text-ink-600'
+                                                            )}
+                                                            strokeWidth={1.6} />
+                                                        <span class="flex-1 truncate text-left">{item.name}</span>
+                                                    </button>
+                                                {/if}
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
             {/if}
         </div>
     </div>
