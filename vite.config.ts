@@ -128,10 +128,10 @@ export default defineConfig(({ mode }) => {
                 },
             },
         },
-        build: {
-            outDir: join(__dirname, 'dist'),
-            emptyOutDir: true,
-        },
+        // build: {
+        //     outDir: join(__dirname, 'dist'),
+        //     emptyOutDir: true,
+        // },
         server: {
             port: 3000,
             host: '0.0.0.0',
