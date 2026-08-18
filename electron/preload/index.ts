@@ -89,7 +89,7 @@ function useLoading() {
         align-items: center;
         justify-content: center;
         background: #282c34;
-        z-index: 9;
+        z-index: 999999;
       }
     `
     const oStyle = document.createElement('style')
@@ -104,6 +104,11 @@ function useLoading() {
         appendLoading() {
             safeDOM.append(document.head, oStyle)
             safeDOM.append(document.body, oDiv)
+            // 移除初始加载遮罩
+            const initialLoader = document.getElementById('initial-loader')
+            if (initialLoader) {
+                initialLoader.remove()
+            }
         },
         removeLoading() {
             safeDOM.remove(document.head, oStyle)
@@ -115,7 +120,11 @@ function useLoading() {
 // ----------------------------------------------------------------------
 
 const { appendLoading, removeLoading } = useLoading()
-domReady().then(appendLoading)
+
+// 等待 DOM 加载后再添加加载画面
+domReady().then(() => {
+    appendLoading()
+})
 
 window.onmessage = ev => {
     ev.data.payload === 'removeLoading' && removeLoading()

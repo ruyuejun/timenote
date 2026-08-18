@@ -53,7 +53,7 @@
     {#if !collapsed}
         <!-- Label row -->
         <div class="mb-2 flex items-center justify-between pl-2 pr-0">
-            <p class="text-[9.5px] font-semibold uppercase tracking-widest text-ink-400">切换公司</p>
+            <p class="text-[9.5px] font-semibold uppercase tracking-widest text-ink-400">{activeCompanyObj.name}</p>
             <div class="relative">
                 <button
                     type="button"
