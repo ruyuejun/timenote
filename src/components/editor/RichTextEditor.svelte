@@ -1,133 +1,66 @@
 <script lang="ts">
-    import { editorStore } from '@/stores/editor.store'
-    import { cn } from '$lib/clsx/clsx.lib'
-    import { Save } from '@lucide/svelte'
+    import { activeTab, tabsStore } from '@/stores/editor.store'
     import type { Editor as TiptapEditor } from '@tiptap/core'
-    import Button from '../ui/Button.svelte'
     import Tiptap from '$lib/editor/tiptap.svelte'
 
-    let editorState = $state({ content: '', filePath: null as string | null })
+    let currentTab = $state($activeTab)
     let currentContent = $state('')
-    let isSaving = $state(false)
-    let saveMessage = $state('')
 
-    editorStore.subscribe(state => {
-        editorState = state
-        currentContent = state.content
+    activeTab.subscribe(tab => {
+        currentTab = tab
+        currentContent = tab?.content || ''
     })
 
     function handleEditorUpdate(editor: TiptapEditor) {
-        currentContent = editor.getHTML()
-    }
-
-    async function handleSave() {
-        if (!editorState.filePath) {
-            saveMessage = '请先选择要保存的文件'
-            setTimeout(() => {
-                saveMessage = ''
-            }, 3000)
-            return
-        }
-
-        isSaving = true
-        saveMessage = ''
-
-        try {
-            // 判断是本地文件还是远程文件
-            if (editorState.filePath.startsWith('/remote/')) {
-                // 远程文件保存逻辑（模拟）
-                await new Promise(resolve => setTimeout(resolve, 500))
-                saveMessage = '✓ 已保存到远程空间'
-            } else {
-                // 本地文件保存逻辑
-                if (typeof window !== 'undefined' && window.electron) {
-                    await window.electron.writeFile(editorState.filePath, currentContent)
-                    saveMessage = '✓ 已保存到本地'
-                }
-            }
-
-            setTimeout(() => {
-                saveMessage = ''
-            }, 3000)
-        } catch (error) {
-            console.error('保存失败:', error)
-            saveMessage = '✗ 保存失败'
-            setTimeout(() => {
-                saveMessage = ''
-            }, 3000)
-        } finally {
-            isSaving = false
+        const newContent = editor.getHTML()
+        currentContent = newContent
+        if (currentTab) {
+            tabsStore.updateTabContent(currentTab.id, newContent)
         }
     }
 </script>
 
 <div class="editor-container">
-    <!-- 固定 Header，不随内容滚动 -->
-    <div class="editor-header">
-        <div class="flex-1">
-            {#if editorState.filePath}
-                <div class="rounded-lg bg-white/50 px-4 py-2 text-sm text-ink-600">
-                    正在编辑: <span class="font-medium text-ink-900">{editorState.filePath}</span>
-                </div>
-            {:else}
-                <div class="rounded-lg bg-white/50 px-4 py-2 text-sm text-ink-500">未选择文件 - 请选择文件进行编辑</div>
-            {/if}
+    {#if currentTab}
+        <div class="editor-content">
+            <Tiptap content={currentTab.content} onUpdate={handleEditorUpdate} />
         </div>
-
-        <div class="flex items-center gap-3">
-            {#if saveMessage}
-                <span
-                    class={cn(
-                        'text-sm font-medium',
-                        saveMessage.startsWith('✓') ? 'text-emerald-600' : 'text-rose-600'
-                    )}>
-                    {saveMessage}
-                </span>
-            {/if}
-            <Button onclick={handleSave} disabled={isSaving || !editorState.filePath} size="sm">
-                <Save class="h-3.5 w-3.5" strokeWidth={2} />
-                {isSaving ? '保存中...' : '保存'}
-            </Button>
+    {:else}
+        <div class="empty-editor">
+            <div class="text-center">
+                <svg class="mx-auto h-12 w-12 text-ink-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p class="mt-4 text-sm text-ink-400">从左侧选择文件开始编辑</p>
+            </div>
         </div>
-    </div>
-
-    <!-- 可滚动的编辑器区域 -->
-    <div class="editor-content">
-        <Tiptap content={editorState.content} onUpdate={handleEditorUpdate} />
-    </div>
+    {/if}
 </div>
 
-<style lang="postcss">
+<style>
     .editor-container {
         display: flex;
         flex: 1 1 0;
         flex-direction: column;
         min-height: 0;
-        overflow: hidden; /* 外层不滚动 */
-    }
-
-    .editor-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        flex-shrink: 0; /* 防止被压缩 */
+        overflow: hidden;
     }
 
     .editor-content {
         flex: 1 1 0;
         min-height: 0;
-        overflow: hidden; /* 让内部的 Tiptap 组件处理滚动 */
+        overflow: hidden;
         display: flex;
         flex-direction: column;
     }
 
-    .flex {
-        @apply flex;
-    }
-
-    .flex-1 {
-        @apply flex-1;
+    .empty-editor {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        border: 2px dashed rgb(229 231 235);
+        background: rgb(255 255 255 / 0.3);
     }
 </style>

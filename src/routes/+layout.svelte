@@ -9,7 +9,7 @@
     let { children } = $props()
     let mobileOpen = $state(false)
     let sidebarWidth = $state(260)
-    let sideRightCollapsed = $state(false)
+    let sideRightCollapsed = $state(true)
     let sideRightWidth = $state(280)
     let contentLeftDragging = $state(false)
     let contentRightDragging = $state(false)

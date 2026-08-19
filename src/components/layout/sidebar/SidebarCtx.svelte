@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { editorStore } from '@/stores/editor.store'
+    import { tabsStore } from '@/stores/editor.store'
     import { remoteSpaceMockData, type RemoteFileItem } from '@/mock/sidebar.mock'
     import { ChevronDown, ChevronRight, File, FileText, Folder, FolderOpen, FolderPlus } from '@lucide/svelte'
 
@@ -16,7 +16,7 @@
     }
 
     function openMock(item: RemoteFileItem) {
-        if (!item.isDirectory) editorStore.setFile(item.path, `# 文件内容\n\n这是来自工作空间的文件：${item.path}`)
+        if (!item.isDirectory) tabsStore.openTab(item.path, `# 文件内容\n\n这是来自工作空间的文件：${item.path}`)
     }
 
     async function addDirectory() {
@@ -36,7 +36,7 @@
     async function openLocal(path: string) {
         if (window.electron) {
             const content = await window.electron.readFile(path)
-            editorStore.setFile(path, content)
+            tabsStore.openTab(path, content)
         }
     }
 </script>
