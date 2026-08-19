@@ -122,7 +122,7 @@
         .ProseMirror {
             border: 1px solid $border-color;
             padding: 12px 16px;
-            min-height: 200px; /* 给一个最小高度，让内容少时也有初始高度 */
+            flex: 1;
             border-radius: $radius;
             outline: none;
             background: #fff;
@@ -171,12 +171,17 @@
 
         .editor-scroll-container {
             min-height: 0;
+            height: 100%;
             overflow-x: hidden;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .editor-mount {
-            min-height: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .bubble-menu {
