@@ -1,10 +1,10 @@
 <script lang="ts">
     import { editorStore } from '@/stores/editor.store'
     import { cn } from '$lib/clsx/clsx.lib'
-    import Tiptap from '@/editor/Tiptap.svelte'
     import { Save } from '@lucide/svelte'
     import type { Editor as TiptapEditor } from '@tiptap/core'
     import Button from '../ui/Button.svelte'
+    import Tiptap from '$lib/editor/tiptap.svelte'
 
     let editorState = $state({ content: '', filePath: null as string | null })
     let currentContent = $state('')
