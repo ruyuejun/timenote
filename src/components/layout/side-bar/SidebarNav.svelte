@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { cn } from '@/utils/clsx.util'
+    import { cn } from '$lib/utils'
     import { editorStore } from '@/stores/editor.store'
     import { remoteSpaceMockData, type RemoteFileItem } from '@/mock/sidebar.mock'
     import {

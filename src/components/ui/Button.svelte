@@ -1,9 +1,7 @@
-<script lang="ts">
-    import type { HTMLButtonAttributes } from 'svelte/elements'
-    import { cn } from '@/utils/clsx.util'
-    import { tv, type VariantProps } from 'tailwind-variants'
+<script lang="ts" module>
+    import { type VariantProps, tv } from 'tailwind-variants'
 
-    const buttonVariants = tv({
+    export const buttonVariants = tv({
         base: 'inline-flex items-center justify-center gap-1.5 font-medium transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50',
         variants: {
             variant: {
@@ -23,11 +21,21 @@
         },
     })
 
-    interface Props extends HTMLButtonAttributes, VariantProps<typeof buttonVariants> {
+    export type ButtonVariant = VariantProps<typeof buttonVariants>['variant']
+    export type ButtonSize = VariantProps<typeof buttonVariants>['size']
+</script>
+
+<script lang="ts">
+    import { cn } from '$lib/utils.js'
+    import type { HTMLButtonAttributes } from 'svelte/elements'
+
+    interface Props extends HTMLButtonAttributes {
+        variant?: ButtonVariant
+        size?: ButtonSize
         children?: import('svelte').Snippet
     }
 
-    let { variant, size, class: className, children, ...rest }: Props = $props()
+    let { variant = 'primary', size = 'md', class: className, children, ...rest }: Props = $props()
 </script>
 
 <button class={cn(buttonVariants({ variant, size }), className)} {...rest}>

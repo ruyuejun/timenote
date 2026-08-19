@@ -1,8 +1,8 @@
 <script lang="ts">
     import { editorStore } from '@/stores/editor.store'
-    import { cn } from '@/utils/clsx.util'
+    import { cn } from '$lib/utils'
     import Tiptap from '@/editor/Tiptap.svelte'
-    import Button from '@/components/ui/Button.svelte'
+    import Button from '$lib/components/ui/Button.svelte'
     import { Save } from '@lucide/svelte'
     import type { Editor as TiptapEditor } from '@tiptap/core'
 

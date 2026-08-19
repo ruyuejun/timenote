@@ -1,9 +1,7 @@
-<script lang="ts">
-    import type { HTMLAttributes } from 'svelte/elements'
-    import { cn } from '@/utils/clsx.util'
-    import { tv, type VariantProps } from 'tailwind-variants'
+<script lang="ts" module>
+    import { type VariantProps, tv } from 'tailwind-variants'
 
-    const cardVariants = tv({
+    export const cardVariants = tv({
         base: 'rounded-2xl',
         variants: {
             variant: {
@@ -17,7 +15,15 @@
         },
     })
 
-    interface Props extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof cardVariants> {
+    export type CardVariant = VariantProps<typeof cardVariants>['variant']
+</script>
+
+<script lang="ts">
+    import { cn } from '$lib/utils.js'
+    import type { HTMLAttributes } from 'svelte/elements'
+
+    interface Props extends HTMLAttributes<HTMLDivElement> {
+        variant?: CardVariant
         strong?: boolean
         flat?: boolean
         children?: import('svelte').Snippet

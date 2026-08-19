@@ -1,10 +1,8 @@
-<script lang="ts">
-    import type { HTMLAttributes } from 'svelte/elements'
-    import { cn } from '@/utils/clsx.util'
-    import { tv, type VariantProps } from 'tailwind-variants'
+<script lang="ts" module>
+    import { type VariantProps, tv } from 'tailwind-variants'
 
-    const badgeVariants = tv({
-        base: 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11.5px] font-medium',
+    export const badgeVariants = tv({
+        base: 'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11.5px] font-medium transition-colors',
         variants: {
             tone: {
                 success: 'bg-emerald-100 text-emerald-700',
@@ -19,11 +17,19 @@
         },
     })
 
-    interface Props extends HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {
+    export type BadgeTone = VariantProps<typeof badgeVariants>['tone']
+</script>
+
+<script lang="ts">
+    import { cn } from '$lib/utils.js'
+    import type { HTMLAttributes } from 'svelte/elements'
+
+    interface Props extends HTMLAttributes<HTMLSpanElement> {
+        tone?: BadgeTone
         children?: import('svelte').Snippet
     }
 
-    let { tone, class: className, children, ...rest }: Props = $props()
+    let { tone = 'neutral', class: className, children, ...rest }: Props = $props()
 </script>
 
 <span class={cn(badgeVariants({ tone }), className)} {...rest}>
