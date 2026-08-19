@@ -157,23 +157,26 @@
         }
 
         .bubble-menu {
-            display: none; /* 默认隐藏，由 Tiptap 控制显示 */
+            display: flex;
             gap: 2px;
             background: #fff;
             border: 1px solid $border-color;
             border-radius: 8px;
             padding: 4px 6px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            visibility: hidden; /* 使用 visibility 而不是 display */
+            opacity: 0;
+            transition: opacity 0.2s;
+
+            // &[data-show='true'] {
+            //     visibility: visible;
+            //     opacity: 1;
+            // }
 
             button {
                 padding: 4px 10px;
                 font-size: 14px;
             }
         }
-    }
-
-    /* Tiptap 会给 bubble-menu 添加 data-show 属性来控制显示 */
-    :global(.bubble-menu[data-show]) {
-        display: flex !important;
     }
 </style>
