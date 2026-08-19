@@ -9,6 +9,7 @@ export const initElectronApi = () => {
             electron: process.versions.electron,
         },
         openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog'),
+        createDirectoryDialog: () => ipcRenderer.invoke('create-directory-dialog'),
         saveFileDialog: (defaultName?: string) => ipcRenderer.invoke('save-file-dialog', defaultName),
         readDirectory: (dirPath: string) => ipcRenderer.invoke('read-directory', dirPath),
         readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),

@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { onMount } from 'svelte'
     import RichTextEditor from '@/components/editor/RichTextEditor.svelte'
+    import StartupPage from '@/views/startup/StartupPage.svelte'
     import { tabsStore, activeTab } from '@/stores/editor.store'
     import { localFilesStore } from '@/stores/localFiles.store'
 
@@ -8,10 +8,6 @@
 
     activeTab.subscribe(tab => {
         currentTab = tab
-    })
-
-    onMount(() => {
-        tabsStore.createNewTab('<p></p>')
     })
 
     async function handleSave() {
@@ -38,5 +34,9 @@
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
-    <RichTextEditor onSave={handleSave} />
+    {#if currentTab}
+        <RichTextEditor onSave={handleSave} />
+    {:else}
+        <StartupPage />
+    {/if}
 </div>

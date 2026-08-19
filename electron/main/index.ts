@@ -132,6 +132,24 @@ ipcMain.handle('open-directory-dialog', async () => {
     return result.filePaths[0]
 })
 
+// Create directory dialog
+ipcMain.handle('create-directory-dialog', async () => {
+    const { dialog } = await import('electron')
+    const fs = await import('fs/promises')
+    const result = await dialog.showSaveDialog({
+        title: '创建文件夹',
+        defaultPath: '新建文件夹',
+        buttonLabel: '创建'
+    })
+
+    if (result.canceled || !result.filePath) {
+        return null
+    }
+
+    await fs.mkdir(result.filePath)
+    return result.filePath
+})
+
 // Save file dialog
 ipcMain.handle('save-file-dialog', async (_, defaultName: string = 'untitled.md') => {
     const { dialog } = await import('electron')

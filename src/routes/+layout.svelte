@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onMount } from 'svelte'
     import { theme } from '@/stores/theme.store'
-    import Sidebar from '@/components/layout/sidebar/Sidebar.svelte'
-    import Content from '@/components/layout/content/Content.svelte'
-    import SideRight from '@/components/layout/sideright/SideRight.svelte'
+    import Sidebar from '@/views/layout/sidebar/Sidebar.svelte'
+    import Content from '@/views/layout/content/Content.svelte'
+    import SideRight from '@/views/layout/sideright/SideRight.svelte'
     import '../app.css'
 
     let { children } = $props()

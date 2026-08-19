@@ -18,6 +18,7 @@ interface Window {
             electron: string
         }
         openDirectoryDialog: () => Promise<string | null>
+        createDirectoryDialog: () => Promise<string | null>
         saveFileDialog: (defaultName?: string) => Promise<string | null>
         readDirectory: (dirPath: string) => Promise<FileSystemItem[]>
         readFile: (filePath: string) => Promise<string>
