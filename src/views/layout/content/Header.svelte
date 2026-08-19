@@ -44,10 +44,7 @@
             {/each}
         </div>
     {:else}
-        <div class="empty-state">
-            <FileText class="h-4 w-4 text-ink-300" />
-            <span class="text-xs text-ink-400">未打开文件</span>
-        </div>
+        <div class="empty-state"></div>
     {/if}
 </header>
 
@@ -169,11 +166,6 @@
     }
 
     .empty-state {
-        display: flex;
-        flex: 1;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.5rem 0;
+        display: none;
     }
 </style>

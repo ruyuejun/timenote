@@ -45,6 +45,7 @@
 
     .startup-content {
         width: min(100%, 34rem);
+        transform: translateY(-5.5rem);
         text-align: center;
     }
 
@@ -91,7 +92,10 @@
         color: #454c6a;
         font-size: 0.875rem;
         font-weight: 600;
-        transition: background 0.15s, border-color 0.15s, color 0.15s;
+        transition:
+            background 0.15s,
+            border-color 0.15s,
+            color 0.15s;
     }
 
     .action-button:hover {
