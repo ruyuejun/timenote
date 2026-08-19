@@ -1,7 +1,7 @@
 <script lang="ts">
-    import Editor from '@/components/editor/Editor.svelte'
+    import RichTextEditor from '@/components/editor/RichTextEditor.svelte'
 </script>
 
 <div class="h-full">
-    <Editor />
+    <RichTextEditor />
 </div>
