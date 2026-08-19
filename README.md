@@ -172,13 +172,3 @@ pnpm build
 ## Testing
 
 Vitest and Playwright are included in the development dependencies. Add unit tests and end-to-end tests according to the needs of your application, then run them with the corresponding test runner commands.
-
-## Image Conversion
-
-The repository includes a small utility for converting images to AVIF format. Run it with:
-
-```bash
-pnpm img2avif
-```
-
-Review the utility configuration before using it in a production asset pipeline.
