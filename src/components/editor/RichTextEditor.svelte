@@ -69,9 +69,7 @@
                     正在编辑: <span class="font-medium text-ink-900">{editorState.filePath}</span>
                 </div>
             {:else}
-                <div class="rounded-lg bg-white/50 px-4 py-2 text-sm text-ink-500">
-                    未选择文件 - 请从左侧菜单选择文件进行编辑
-                </div>
+                <div class="rounded-lg bg-white/50 px-4 py-2 text-sm text-ink-500">未选择文件 - 请选择文件进行编辑</div>
             {/if}
         </div>
 

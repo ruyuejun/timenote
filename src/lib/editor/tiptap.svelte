@@ -27,6 +27,10 @@
                 Underline, // 启用下划线
                 BubbleMenu.configure({
                     element: bubbleMenuElement,
+                    shouldShow: ({ state, from, to }) => {
+                        // 只在有文字选中时显示
+                        return from !== to
+                    },
                 }),
             ],
             content: content,
@@ -153,7 +157,7 @@
         }
 
         .bubble-menu {
-            display: flex;
+            display: none; /* 默认隐藏，由 Tiptap 控制显示 */
             gap: 2px;
             background: #fff;
             border: 1px solid $border-color;
@@ -166,5 +170,10 @@
                 font-size: 14px;
             }
         }
+    }
+
+    /* Tiptap 会给 bubble-menu 添加 data-show 属性来控制显示 */
+    :global(.bubble-menu[data-show]) {
+        display: flex !important;
     }
 </style>
