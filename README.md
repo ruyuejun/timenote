@@ -9,17 +9,16 @@ The template includes a practical development workflow with code quality checks,
 - Electron 43
 - Svelte 5
 - TypeScript
-- Vite-powered development and production builds
-- Electron main process and preload process support
+- Shadcn
 - Tailwind CSS and Sass
 - Electron Builder packaging configuration
 - Electron Updater integration
+- Vite-powered development and production builds
 - Vitest and Playwright setup
 - Oxlint and Oxfmt for linting and formatting
 - Commitizen and Commitlint for consistent commit messages
 - Lefthook Git hooks
 - AVIF image conversion utility
-- Separate development and production environment files
 
 ## Requirements
 
@@ -100,23 +99,6 @@ set ELECTRON_BUILDER_BINARIES_MIRROR="https://cdn.npmmirror.com/binaries/electro
 $env:ELECTRON_BUILDER_BINARIES_MIRROR="https://cdn.npmmirror.com/binaries/electron-builder-binaries"
 ```
 
-## Available Scripts
-
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Start the development server |
-| `pnpm build` | Build the application for production |
-| `pnpm preview` | Preview the production build |
-| `pnpm lint` | Run Oxlint |
-| `pnpm lint:fix` | Fix automatically repairable lint issues |
-| `pnpm format` | Format supported files with Oxfmt |
-| `pnpm format:check` | Check formatting without changing files |
-| `pnpm commit` | Stage changes and open the Commitizen prompt |
-| `pnpm pull` | Pull changes from the configured Git remote |
-| `pnpm push` | Push changes to the configured Git remote |
-| `pnpm img2avif` | Convert images to AVIF using the bundled utility |
-| `pnpm prepare` | Install Lefthook Git hooks |
-
 ## Project Structure
 
 ```text
@@ -126,9 +108,24 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR="https://cdn.npmmirror.com/binaries/electr
 │   └── preload    # Secure renderer bridge
 ├── img2avif       # Image conversion utility
 ├── src
-│   ├── assets     # Static assets
-│   ├── App.svelte # Main Svelte component
-│   ├── index.html # Renderer HTML entry
+│   ├── assets     # Static assets (images, fonts, etc.)
+│   ├── components # Application-specific components
+│   │   ├── editor # Editor-related components
+│   │   ├── layout # Layout components (header, sidebar, etc.)
+│   │   └── ui     # Application UI components
+│   ├── lib        # Reusable library code
+│   │   ├── clsx   # Class name utility
+│   │   ├── components
+│   │   │   └── ui # Shadcn UI components (badge, button, card, modal, etc.)
+│   │   └── editor # Editor utilities
+│   ├── mock       # Mock data for development
+│   ├── plugins    # Vite/application plugins
+│   ├── routes     # Application routes
+│   ├── stores     # Svelte stores for state management
+│   ├── types      # TypeScript type definitions
+│   ├── utils      # Utility functions
+│   ├── app.css    # Global styles
+│   ├── app.html   # Main app template
 │   └── main.ts    # Renderer entry point
 ├── .env.development
 ├── .env.production
@@ -138,6 +135,11 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR="https://cdn.npmmirror.com/binaries/electr
 ├── tsconfig.json
 └── vite.config.ts
 ```
+
+- **`src/components/`**: Contains application-specific components that are tied to your app's business logic and features (editor, layout, UI widgets).
+- **`src/lib/`**: Houses reusable library code that can be shared across projects:
+  - **`lib/components/ui/`**: Shadcn-based UI primitives (badge, button, card, modal) that follow a consistent design system.
+  - **`lib/clsx/`** and **`lib/editor/`**: Utility modules for class names and editor functionality.
 
 ## Code Quality and Git Hooks
 
@@ -171,12 +173,6 @@ pnpm build
 
 Vitest and Playwright are included in the development dependencies. Add unit tests and end-to-end tests according to the needs of your application, then run them with the corresponding test runner commands.
 
-## Packaging
-
-Electron Builder is configured in `package.json` with the application ID `com.electron.svelte.app` and the output directory `release`.
-
-Before producing release artifacts, verify the application metadata, icons, platform targets, signing configuration, and update provider settings for your distribution environment.
-
 ## Image Conversion
 
 The repository includes a small utility for converting images to AVIF format. Run it with:
@@ -186,17 +182,3 @@ pnpm img2avif
 ```
 
 Review the utility configuration before using it in a production asset pipeline.
-
-## Customization
-
-1. Update the application metadata in `package.json`.
-2. Replace the starter UI in `src/App.svelte`.
-3. Add renderer features under `src`.
-4. Add Electron-native behavior under `electron/main`.
-5. Expose only the required APIs through `electron/preload`.
-6. Update environment files for your development and production services.
-7. Configure Electron Builder for your target platforms and release process.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
