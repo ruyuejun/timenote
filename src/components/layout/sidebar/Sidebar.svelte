@@ -5,12 +5,10 @@
     import SidebarFooter from './SidebarFooter.svelte'
     interface Props {
         width: number
-        activeSpace: 'local' | 'remote'
         onToggleCollapse: () => void
-        onSpaceChange: (space: 'local' | 'remote') => void
         onWidthChange: (width: number) => void
     }
-    let { width, activeSpace, onToggleCollapse, onSpaceChange, onWidthChange }: Props = $props()
+    let { width, onToggleCollapse, onWidthChange }: Props = $props()
     const MIN_WIDTH = 240
     const MAX_WIDTH = 400
     let dragging = $state(false)
@@ -29,8 +27,8 @@
 
 <aside class="glass-sidebar relative flex shrink-0 flex-col border-r border-white/50" style:width={`${width}px`}>
     <SidebarTop {onToggleCollapse} />
-    <SidebarToolbar {activeSpace} {onSpaceChange} />
-    <SidebarCtx {activeSpace} />
+    <SidebarToolbar />
+    <SidebarCtx />
     <SidebarFooter />
     <button
         type="button"

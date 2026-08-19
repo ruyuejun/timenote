@@ -11,7 +11,6 @@
     let sidebarWidth = $state(260)
     let sideRightCollapsed = $state(false)
     let sideRightWidth = $state(280)
-    let activeSpace = $state<'local' | 'remote'>('local')
     let contentLeftDragging = $state(false)
     let contentRightDragging = $state(false)
 
@@ -64,9 +63,7 @@
 <div class="relative z-10 flex h-screen overflow-hidden">
     <Sidebar
         width={sidebarWidth}
-        {activeSpace}
         onToggleCollapse={() => (sidebarWidth = SIDEBAR_MIN)}
-        onSpaceChange={space => (activeSpace = space)}
         onWidthChange={handleSidebarResize} />
 
     {#if mobileOpen}
