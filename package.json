@@ -68,6 +68,7 @@
         "sharp": "^0.35.3",
         "svelte": "^5.56.9",
         "svelte-check": "^4.7.6",
+        "tailwind-variants": "^3.3.1",
         "tailwindcss": "^4.3.3",
         "typescript": "^7.0.2",
         "vite": "^8.2.1",

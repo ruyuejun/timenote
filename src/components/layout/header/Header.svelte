@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Bell, Search, Settings, LogOut, User, Palette, Menu } from '@lucide/svelte'
-    import { theme, type Theme } from '@/stores/theme'
-    import { cn } from '@/utils/clsx'
+    import { theme, type Theme } from '@/stores/theme.store'
+    import { cn } from '@/utils/clsx.util'
 
     interface Props {
         onMenuClick: () => void

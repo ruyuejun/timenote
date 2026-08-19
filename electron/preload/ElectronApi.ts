@@ -1,7 +1,7 @@
 import { ipcRenderer, contextBridge } from 'electron'
 
 export const initElectronApi = () => {
-    contextBridge.exposeInMainWorld('electronAPI', {
+    contextBridge.exposeInMainWorld('electron', {
         platform: process.platform,
         versions: {
             node: process.versions.node,
@@ -11,5 +11,6 @@ export const initElectronApi = () => {
         openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog'),
         readDirectory: (dirPath: string) => ipcRenderer.invoke('read-directory', dirPath),
         readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
+        writeFile: (filePath: string, content: string) => ipcRenderer.invoke('write-file', filePath, content),
     })
 }

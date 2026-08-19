@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte'
-    import { theme } from '@/stores/theme'
+    import { theme } from '@/stores/theme.store'
     import Sidebar from '@/components/layout/side-bar/Sidebar.svelte'
     import Header from '@/components/layout/header/Header.svelte'
     import '../app.css'

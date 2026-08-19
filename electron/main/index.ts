@@ -177,3 +177,16 @@ ipcMain.handle('read-file', async (_, filePath: string) => {
         throw error
     }
 })
+
+// Write file content
+ipcMain.handle('write-file', async (_, filePath: string, content: string) => {
+    const fs = await import('fs/promises')
+    
+    try {
+        await fs.writeFile(filePath, content, 'utf-8')
+        return { success: true }
+    } catch (error) {
+        console.error('Error writing file:', error)
+        throw error
+    }
+})

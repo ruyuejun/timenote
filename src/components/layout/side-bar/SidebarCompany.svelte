@@ -1,6 +1,6 @@
 <script lang="ts">
     import { MoreHorizontal, Star } from '@lucide/svelte'
-    import { cn } from '@/utils/clsx'
+    import { cn } from '@/utils/clsx.util'
 
     interface Props {
         collapsed: boolean

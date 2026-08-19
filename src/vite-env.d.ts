@@ -10,7 +10,7 @@ interface FileSystemItem {
 }
 
 interface Window {
-    electronAPI: {
+    electron: {
         platform: NodeJS.Platform
         versions: {
             node: string
@@ -20,5 +20,6 @@ interface Window {
         openDirectoryDialog: () => Promise<string | null>
         readDirectory: (dirPath: string) => Promise<FileSystemItem[]>
         readFile: (filePath: string) => Promise<string>
+        writeFile: (filePath: string, content: string) => Promise<{ success: boolean }>
     }
 }
