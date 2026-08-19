@@ -1,43 +1,92 @@
 <script lang="ts">
     import { onMount } from 'svelte'
     import { theme } from '@/stores/theme.store'
-    import Sidebar from '@/components/layout/side-bar/Sidebar.svelte'
-    import Header from '@/components/layout/header/Header.svelte'
+    import Sidebar from '@/components/layout/sidebar/Sidebar.svelte'
+    import Content from '@/components/layout/content/Content.svelte'
+    import SideRight from '@/components/layout/sideright/SideRight.svelte'
     import '../app.css'
 
     let { children } = $props()
-
     let mobileOpen = $state(false)
-    let collapsed = $state(false)
+    let sidebarWidth = $state(260)
+    let sideRightCollapsed = $state(false)
+    let sideRightWidth = $state(280)
+    let activeSpace = $state<'local' | 'remote'>('local')
+    let contentLeftDragging = $state(false)
+    let contentRightDragging = $state(false)
 
-    onMount(() => {
-        theme.init()
-    })
+    const SIDEBAR_MIN = 240
+    const SIDEBAR_MAX = 400
+
+    function handleSidebarResize(newWidth: number) {
+        sidebarWidth = newWidth
+    }
+
+    function handleContentLeftResize(e: PointerEvent) {
+        contentLeftDragging = true
+        const startX = e.clientX
+        const startWidth = sidebarWidth
+        const move = (moveEvent: PointerEvent) => {
+            const delta = moveEvent.clientX - startX
+            handleSidebarResize(Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, startWidth + delta)))
+        }
+        const stop = () => {
+            contentLeftDragging = false
+            window.removeEventListener('pointermove', move)
+            window.removeEventListener('pointerup', stop)
+        }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerup', stop)
+    }
+
+    function handleContentRightResize(e: PointerEvent) {
+        contentRightDragging = true
+        const startX = e.clientX
+        const startWidth = sideRightWidth
+        const move = (moveEvent: PointerEvent) => {
+            const delta = startX - moveEvent.clientX
+            const newWidth = Math.min(500, Math.max(48, startWidth + delta))
+            sideRightWidth = newWidth
+        }
+        const stop = () => {
+            contentRightDragging = false
+            window.removeEventListener('pointermove', move)
+            window.removeEventListener('pointerup', stop)
+        }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerup', stop)
+    }
+
+    onMount(() => theme.init())
 </script>
 
 <div class="app-bg"></div>
-
 <div class="relative z-10 flex h-screen overflow-hidden">
     <Sidebar
-        {mobileOpen}
-        {collapsed}
-        onNavigate={() => (mobileOpen = false)}
-        onToggleCollapse={() => (collapsed = !collapsed)} />
+        width={sidebarWidth}
+        {activeSpace}
+        onToggleCollapse={() => (sidebarWidth = SIDEBAR_MIN)}
+        onSpaceChange={space => (activeSpace = space)}
+        onWidthChange={handleSidebarResize} />
 
     {#if mobileOpen}
         <button
             type="button"
             class="fixed inset-0 z-30 bg-ink-900/40 backdrop-blur-sm lg:hidden"
             onclick={() => (mobileOpen = false)}
-            onkeydown={e => e.key === 'Enter' && (mobileOpen = false)}
             aria-label="关闭菜单"></button>
     {/if}
 
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <Header onMenuClick={() => (mobileOpen = true)} />
+    <Content
+        onMenuClick={() => (mobileOpen = true)}
+        onLeftResize={handleContentLeftResize}
+        onRightResize={handleContentRightResize}>
+        {@render children()}
+    </Content>
 
-        <main class="flex min-h-0 flex-1 flex-col overflow-hidden px-6 py-5">
-            {@render children()}
-        </main>
-    </div>
+    <SideRight
+        collapsed={sideRightCollapsed}
+        width={sideRightWidth}
+        onToggleCollapse={() => (sideRightCollapsed = !sideRightCollapsed)}
+        onWidthChange={width => (sideRightWidth = width)} />
 </div>
