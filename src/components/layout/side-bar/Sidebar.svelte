@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { cn } from '$lib/utils'
+    import { cn } from '$lib/clsx/clsx.lib'
     import SidebarTop from './SidebarTop.svelte'
     import SidebarNav from './SidebarNav.svelte'
     import SidebarCompany from './SidebarCompany.svelte'

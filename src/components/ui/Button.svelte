@@ -26,7 +26,7 @@
 </script>
 
 <script lang="ts">
-    import { cn } from '$lib/utils.js'
+    import { cn } from '$lib/clsx/clsx.lib'
     import type { HTMLButtonAttributes } from 'svelte/elements'
 
     interface Props extends HTMLButtonAttributes {

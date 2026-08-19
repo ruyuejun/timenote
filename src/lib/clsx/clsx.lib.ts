@@ -39,3 +39,7 @@ export function clsx(...inputs: ClassValue[]): string {
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(...inputs))
 }
+
+export type WithElementRef<T> = T & {
+    ref?: any
+}

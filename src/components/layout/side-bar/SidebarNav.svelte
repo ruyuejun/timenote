@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { cn } from '$lib/utils'
+    import { cn } from '$lib/clsx/clsx.lib'
     import { editorStore } from '@/stores/editor.store'
     import { remoteSpaceMockData, type RemoteFileItem } from '@/mock/sidebar.mock'
     import {
@@ -495,18 +495,28 @@
                                             )}>
                                             {#if isExpanded}
                                                 <FolderOpen
-                                                    class={cn('h-4 w-4 shrink-0', 'text-ink-400 group-hover:text-ink-600')}
+                                                    class={cn(
+                                                        'h-4 w-4 shrink-0',
+                                                        'text-ink-400 group-hover:text-ink-600'
+                                                    )}
                                                     strokeWidth={1.6} />
                                             {:else}
                                                 <Folder
-                                                    class={cn('h-4 w-4 shrink-0', 'text-ink-400 group-hover:text-ink-600')}
+                                                    class={cn(
+                                                        'h-4 w-4 shrink-0',
+                                                        'text-ink-400 group-hover:text-ink-600'
+                                                    )}
                                                     strokeWidth={1.6} />
                                             {/if}
                                             <span class="flex-1 truncate text-left">{item.name}</span>
                                             {#if isExpanded}
-                                                <ChevronDown class="h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
+                                                <ChevronDown
+                                                    class="h-3.5 w-3.5 shrink-0 text-ink-400"
+                                                    strokeWidth={2} />
                                             {:else}
-                                                <ChevronRight class="h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
+                                                <ChevronRight
+                                                    class="h-3.5 w-3.5 shrink-0 text-ink-400"
+                                                    strokeWidth={2} />
                                             {/if}
                                         </button>
 
@@ -537,7 +547,8 @@
                                                                         )}
                                                                         strokeWidth={1.6} />
                                                                 {/if}
-                                                                <span class="flex-1 truncate text-left">{subItem.name}</span>
+                                                                <span class="flex-1 truncate text-left"
+                                                                    >{subItem.name}</span>
                                                                 {#if subIsExpanded}
                                                                     <ChevronDown
                                                                         class="h-3 w-3 shrink-0 text-ink-400"
@@ -550,7 +561,8 @@
                                                             </button>
 
                                                             {#if subIsExpanded && subItem.children}
-                                                                <div class="ml-4 space-y-0.5 border-l border-ink-200 pl-2">
+                                                                <div
+                                                                    class="ml-4 space-y-0.5 border-l border-ink-200 pl-2">
                                                                     {#each subItem.children as deepItem}
                                                                         {@const IconComponent = getFileIcon(
                                                                             deepItem.name,
@@ -578,7 +590,10 @@
                                                             {/if}
                                                         </div>
                                                     {:else}
-                                                        {@const IconComponent = getFileIcon(subItem.name, subItem.isDirectory)}
+                                                        {@const IconComponent = getFileIcon(
+                                                            subItem.name,
+                                                            subItem.isDirectory
+                                                        )}
                                                         <button
                                                             onclick={() => handleRemoteFileClick(subItem.path)}
                                                             class={cn(
@@ -591,7 +606,8 @@
                                                                     'text-ink-400 group-hover:text-ink-600'
                                                                 )}
                                                                 strokeWidth={1.6} />
-                                                            <span class="flex-1 truncate text-left">{subItem.name}</span>
+                                                            <span class="flex-1 truncate text-left"
+                                                                >{subItem.name}</span>
                                                         </button>
                                                     {/if}
                                                 {/each}

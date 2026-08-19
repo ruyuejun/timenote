@@ -13,5 +13,11 @@ export default {
         files: {
             assets: 'public',
         },
+        alias: {
+            '@': './src',
+            '@/*': './src/*',
+            $utils: './src/utils',
+            '$utils/*': './src/utils/*',
+        },
     },
 }
