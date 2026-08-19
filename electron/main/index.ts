@@ -124,12 +124,31 @@ ipcMain.handle('open-directory-dialog', async () => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory']
     })
-    
+
     if (result.canceled || result.filePaths.length === 0) {
         return null
     }
-    
+
     return result.filePaths[0]
+})
+
+// Save file dialog
+ipcMain.handle('save-file-dialog', async (_, defaultName: string = 'untitled.md') => {
+    const { dialog } = await import('electron')
+    const result = await dialog.showSaveDialog({
+        defaultPath: defaultName,
+        filters: [
+            { name: 'Markdown', extensions: ['md'] },
+            { name: 'Text', extensions: ['txt'] },
+            { name: 'All Files', extensions: ['*'] }
+        ]
+    })
+
+    if (result.canceled || !result.filePath) {
+        return null
+    }
+
+    return result.filePath
 })
 
 // Read directory contents

@@ -1,10 +1,17 @@
 <script lang="ts">
+    import { onMount } from 'svelte'
     import { tabsStore } from '@/stores/editor.store'
+    import { localFilesStore } from '@/stores/localFiles.store'
     import { remoteSpaceMockData, type RemoteFileItem } from '@/mock/sidebar.mock'
     import { ChevronDown, ChevronRight, File, FileText, Folder, FolderOpen, FolderPlus } from '@lucide/svelte'
 
     let directories = $state<{ path: string; name: string; expanded: boolean; children?: { name: string; path: string; isDirectory: boolean }[] }[]>([])
+    let localDirs = $state<{ path: string; name: string; expanded: boolean; children?: { name: string; path: string; isDirectory: boolean }[] }[]>([])
     let mockExpanded = $state(new Set<string>())
+
+    localFilesStore.subscribe(dirs => {
+        localDirs = dirs
+    })
 
     function fileIcon(name: string, directory: boolean) {
         if (directory) return Folder
@@ -38,6 +45,14 @@
             const content = await window.electron.readFile(path)
             tabsStore.openTab(path, content)
         }
+    }
+
+    async function toggleLocalFilesDir(dir: { path: string; name: string; expanded: boolean; children?: { name: string; path: string; isDirectory: boolean }[] }) {
+        if (!dir.expanded && !dir.children && window.electron) {
+            const children = await window.electron.readDirectory(dir.path)
+            localFilesStore.updateDirectoryChildren(dir.path, children)
+        }
+        await localFilesStore.toggleExpanded(dir.path)
     }
 </script>
 
@@ -131,6 +146,55 @@
                         </div>
                     {/if}
                 </div>
+            {/each}
+        {/if}
+
+        {#if localDirs.length > 0}
+            <div class="my-2 border-t border-ink-200 pt-2"></div>
+            {#each localDirs as dir}
+                {#if dir.isStandaloneFile}
+                    {@const Icon = fileIcon(dir.name, false)}
+                    <button
+                        type="button"
+                        onclick={() => openLocal(dir.path)}
+                        class="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs text-ink-700 hover:bg-white/60">
+                        <Icon class="h-4 w-4 shrink-0 text-ink-400" />
+                        <span class="flex-1 truncate">{dir.name}</span>
+                    </button>
+                {:else}
+                    <div class="space-y-0.5">
+                        <button
+                            type="button"
+                            onclick={() => toggleLocalFilesDir(dir)}
+                            class="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs text-ink-700 hover:bg-white/60">
+                            {#if dir.expanded}
+                                <FolderOpen class="h-4 w-4 shrink-0 text-brand-500" />
+                            {:else}
+                                <Folder class="h-4 w-4 shrink-0 text-ink-400" />
+                            {/if}
+                            <span class="flex-1 truncate">{dir.name}</span>
+                            {#if dir.expanded}
+                                <ChevronDown class="h-3.5 w-3.5 shrink-0" />
+                            {:else}
+                                <ChevronRight class="h-3.5 w-3.5 shrink-0" />
+                            {/if}
+                        </button>
+                        {#if dir.expanded}
+                            <div class="ml-4 space-y-0.5 border-l border-ink-200 pl-2">
+                                {#each dir.children ?? [] as item}
+                                    {@const Icon = fileIcon(item.name, item.isDirectory)}
+                                    <button
+                                        type="button"
+                                        onclick={() => !item.isDirectory && openLocal(item.path)}
+                                        class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-ink-600 hover:bg-white/60">
+                                        <Icon class="h-3.5 w-3.5 shrink-0 text-ink-400" />
+                                        <span class="truncate">{item.name}</span>
+                                    </button>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
             {/each}
         {/if}
     </nav>

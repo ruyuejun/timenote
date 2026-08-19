@@ -6,6 +6,7 @@ export interface Tab {
     fileName: string
     content: string
     isDirty: boolean
+    isNew?: boolean
 }
 
 interface TabsState {
@@ -42,6 +43,32 @@ function createTabsStore() {
                     activeTabId: newTab.id
                 }
             })
+        },
+        createNewTab: (content: string = '<p></p>') => {
+            const newTab: Tab = {
+                id: crypto.randomUUID(),
+                filePath: '',
+                fileName: '新文档.md',
+                content,
+                isDirty: true,
+                isNew: true
+            }
+
+            update(state => ({
+                tabs: [...state.tabs, newTab],
+                activeTabId: newTab.id
+            }))
+
+            return newTab.id
+        },
+        updateTabPath: (tabId: string, filePath: string) => {
+            const fileName = filePath.split('/').pop() || filePath
+            update(state => ({
+                ...state,
+                tabs: state.tabs.map(tab =>
+                    tab.id === tabId ? { ...tab, filePath, fileName, isDirty: false, isNew: false } : tab
+                )
+            }))
         },
         closeTab: (tabId: string) => {
             update(state => {

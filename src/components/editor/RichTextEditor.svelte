@@ -3,6 +3,12 @@
     import type { Editor as TiptapEditor } from '@tiptap/core'
     import Tiptap from '$lib/editor/tiptap.svelte'
 
+    interface Props {
+        onSave?: () => void
+    }
+
+    let { onSave }: Props = $props()
+
     let currentTab = $state($activeTab)
     let currentContent = $state('')
 
@@ -23,7 +29,7 @@
 <div class="editor-container">
     {#if currentTab}
         <div class="editor-content">
-            <Tiptap content={currentTab.content} onUpdate={handleEditorUpdate} />
+            <Tiptap content={currentTab.content} onUpdate={handleEditorUpdate} {onSave} />
         </div>
     {:else}
         <div class="empty-editor">

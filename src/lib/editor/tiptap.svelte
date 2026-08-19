@@ -10,7 +10,8 @@
     const {
         content = '<p>Hello TypeScript with Tiptap! 👋</p>',
         onUpdate,
-    }: { content?: string; onUpdate?: (editor: TiptapEditor) => void } = $props()
+        onSave,
+    }: { content?: string; onUpdate?: (editor: TiptapEditor) => void; onSave?: () => void } = $props()
 
     let editor = $state<TiptapEditor | null>(null)
     let editorElement = $state<HTMLElement | null>(null)
@@ -81,7 +82,7 @@
 <div class="editor-wrapper">
     {#if editor}
         <div class="toolbar-sticky">
-            <Toolbar {editor} />
+            <Toolbar {editor} {onSave} />
         </div>
     {/if}
 
