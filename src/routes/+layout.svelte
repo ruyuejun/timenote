@@ -17,7 +17,7 @@
 
 <div class="app-bg"></div>
 
-<div class="relative z-10 flex min-h-screen">
+<div class="relative z-10 flex h-screen overflow-hidden">
     <Sidebar
         {mobileOpen}
         {collapsed}
@@ -33,10 +33,10 @@
             aria-label="关闭菜单"></button>
     {/if}
 
-    <div class="flex min-w-0 flex-1 flex-col">
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header onMenuClick={() => (mobileOpen = true)} />
 
-        <main class="flex-1 px-6 py-5">
+        <main class="flex min-h-0 flex-1 flex-col overflow-hidden px-6 py-5">
             {@render children()}
         </main>
     </div>

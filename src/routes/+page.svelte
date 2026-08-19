@@ -2,6 +2,6 @@
     import RichTextEditor from '@/components/editor/RichTextEditor.svelte'
 </script>
 
-<div class="h-full">
+<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
     <RichTextEditor />
 </div>

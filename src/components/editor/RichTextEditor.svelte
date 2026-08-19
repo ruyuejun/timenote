@@ -61,8 +61,9 @@
     }
 </script>
 
-<div class="flex h-full flex-col">
-    <div class="mb-4 flex items-center justify-between gap-4">
+<div class="editor-container">
+    <!-- 固定 Header，不随内容滚动 -->
+    <div class="editor-header">
         <div class="flex-1">
             {#if editorState.filePath}
                 <div class="rounded-lg bg-white/50 px-4 py-2 text-sm text-ink-600">
@@ -90,29 +91,43 @@
         </div>
     </div>
 
-    <div class="flex-1 overflow-auto">
+    <!-- 可滚动的编辑器区域 -->
+    <div class="editor-content">
         <Tiptap content={editorState.content} onUpdate={handleEditorUpdate} />
     </div>
 </div>
 
 <style lang="postcss">
+    .editor-container {
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden; /* 外层不滚动 */
+    }
+
+    .editor-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-shrink: 0; /* 防止被压缩 */
+    }
+
+    .editor-content {
+        flex: 1 1 0;
+        min-height: 0;
+        overflow: hidden; /* 让内部的 Tiptap 组件处理滚动 */
+        display: flex;
+        flex-direction: column;
+    }
+
     .flex {
         @apply flex;
     }
 
-    .h-full {
-        @apply h-full;
-    }
-
-    .flex-col {
-        @apply flex-col;
-    }
-
     .flex-1 {
         @apply flex-1;
-    }
-
-    .overflow-auto {
-        @apply overflow-auto;
     }
 </style>

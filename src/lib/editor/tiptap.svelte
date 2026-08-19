@@ -85,8 +85,11 @@
         </div>
     {/if}
 
-    <!-- 编辑器挂载点 -->
-    <div bind:this={editorElement} class="editor-mount"></div>
+    <!-- 滚动容器，固定高度 -->
+    <div class="editor-scroll-container">
+        <!-- 编辑器挂载点 -->
+        <div bind:this={editorElement} class="editor-mount"></div>
+    </div>
 
     <!-- 气泡菜单 -->
     <div bind:this={bubbleMenuElement} class="bubble-menu">
@@ -107,9 +110,11 @@
 
     .editor-wrapper {
         font-family: system-ui, sans-serif;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        flex: 1 1 0;
+        min-height: 0;
+        overflow: hidden;
     }
 
     // 使用 :global 块包裹所有需要全局生效的样式
@@ -117,8 +122,7 @@
         .ProseMirror {
             border: 1px solid $border-color;
             padding: 12px 16px;
-            min-height: 100%;
-            height: 100%;
+            min-height: 200px; /* 给一个最小高度，让内容少时也有初始高度 */
             border-radius: $radius;
             outline: none;
             background: #fff;
@@ -152,7 +156,8 @@
         .toolbar-sticky {
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 1;
+            flex-shrink: 0; /* 防止被压缩 */
             display: flex;
             gap: 4px;
             margin-bottom: 8px;
@@ -161,15 +166,17 @@
             border-radius: $radius;
             background: $bg-light;
             flex-wrap: wrap;
-            backdrop-filter: blur(8px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
+        .editor-scroll-container {
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
         .editor-mount {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: auto;
+            min-height: 100%;
         }
 
         .bubble-menu {
@@ -181,7 +188,7 @@
             border-radius: 8px;
             padding: 4px 6px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-            
+
             /* 默认隐藏，防止启动时显示 */
             visibility: hidden;
             opacity: 0;
@@ -195,7 +202,7 @@
     }
 
     /* Tiptap 控制显示时的样式 */
-    :global(.bubble-menu[style*="visibility: visible"]),
+    :global(.bubble-menu[style*='visibility: visible']),
     :global(.bubble-menu[data-tippy-root]) {
         visibility: visible !important;
         opacity: 1 !important;
