@@ -80,7 +80,7 @@
 <!-- ---------- 模板 ---------- -->
 <div class="editor-wrapper">
     {#if editor}
-        <div class="toolbar">
+        <div class="toolbar-sticky">
             <Toolbar {editor} />
         </div>
     {/if}
@@ -107,6 +107,9 @@
 
     .editor-wrapper {
         font-family: system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
 
     // 使用 :global 块包裹所有需要全局生效的样式
@@ -114,7 +117,8 @@
         .ProseMirror {
             border: 1px solid $border-color;
             padding: 12px 16px;
-            min-height: 180px;
+            min-height: 100%;
+            height: 100%;
             border-radius: $radius;
             outline: none;
             background: #fff;
@@ -145,7 +149,10 @@
     }
 
     .editor-wrapper {
-        .toolbar {
+        .toolbar-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 10;
             display: flex;
             gap: 4px;
             margin-bottom: 8px;
@@ -154,9 +161,19 @@
             border-radius: $radius;
             background: $bg-light;
             flex-wrap: wrap;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .editor-mount {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: auto;
         }
 
         .bubble-menu {
+            position: absolute;
             display: flex;
             gap: 2px;
             background: #fff;
