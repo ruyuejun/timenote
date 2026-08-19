@@ -3,7 +3,7 @@
     import { Editor, type Editor as TiptapEditor } from '@tiptap/core'
     import { StarterKit } from '@tiptap/starter-kit'
     import { BubbleMenu } from '@tiptap/extension-bubble-menu'
-    import Underline from '@tiptap/extension-underline' // 新增
+    import Underline from '@tiptap/extension-underline'
     import Toolbar from './toolbar.svelte'
 
     // ---------- 组件 Props ----------
@@ -27,11 +27,11 @@
                 Underline, // 启用下划线
                 BubbleMenu.configure({
                     element: bubbleMenuElement,
-                    shouldShow: ({ state, from, to }) => {
+                    shouldShow: ({ from, to }: { state: any; from: number; to: number }) => {
                         // 只在有文字选中时显示
                         return from !== to
                     },
-                }),
+                } as any),
             ],
             content: content,
             onUpdate: ({ editor }) => {
@@ -164,19 +164,24 @@
             border-radius: 8px;
             padding: 4px 6px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-            visibility: hidden; /* 使用 visibility 而不是 display */
+            
+            /* 默认隐藏，防止启动时显示 */
+            visibility: hidden;
             opacity: 0;
-            transition: opacity 0.2s;
-
-            // &[data-show='true'] {
-            //     visibility: visible;
-            //     opacity: 1;
-            // }
+            pointer-events: none;
 
             button {
                 padding: 4px 10px;
                 font-size: 14px;
             }
         }
+    }
+
+    /* Tiptap 控制显示时的样式 */
+    :global(.bubble-menu[style*="visibility: visible"]),
+    :global(.bubble-menu[data-tippy-root]) {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 </style>
