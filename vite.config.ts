@@ -133,7 +133,7 @@ export default defineConfig(({ mode }) => {
         //     emptyOutDir: true,
         // },
         server: {
-            port: 3000,
+            port: 4000,
             host: '0.0.0.0',
             headers: {
                 'Access-Control-Allow-Origin': '*',
