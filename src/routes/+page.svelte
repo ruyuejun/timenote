@@ -1,8 +1,9 @@
 <script lang="ts">
+    import { onMount } from 'svelte'
     import RichTextEditor from '@/components/editor/RichTextEditor.svelte'
     import StartupPage from '@/views/startup/StartupPage.svelte'
-    import { tabsStore, activeTab } from '@/stores/editor.store'
-    import { localFilesStore } from '@/stores/localFiles.store'
+    import { activeTab } from '@/stores/editor.store'
+    import { isSaveHotkey, saveActiveDocument } from '$lib/editor/save-document'
 
     let currentTab = $state($activeTab)
 
@@ -10,32 +11,20 @@
         currentTab = tab
     })
 
-    async function handleSave() {
-        if (!currentTab || typeof window === 'undefined' || !window.electron) return
-
-        try {
-            const filePath = await window.electron.saveFileDialog(currentTab.fileName)
-
-            if (filePath) {
-                await window.electron.writeFile(filePath, currentTab.content)
-                tabsStore.updateTabPath(currentTab.id, filePath)
-
-                if (currentTab.isNew) {
-                    localFilesStore.addStandaloneFile(filePath)
-                } else {
-                    const dirPath = filePath.substring(0, filePath.lastIndexOf('/'))
-                    localFilesStore.addDirectory(dirPath)
-                }
-            }
-        } catch (error) {
-            console.error('保存失败:', error)
+    onMount(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (!isSaveHotkey(event)) return
+            event.preventDefault()
+            void saveActiveDocument()
         }
-    }
+        window.addEventListener('keydown', onKeyDown, true)
+        return () => window.removeEventListener('keydown', onKeyDown, true)
+    })
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
     {#if currentTab}
-        <RichTextEditor onSave={handleSave} />
+        <RichTextEditor onSave={saveActiveDocument} />
     {:else}
         <StartupPage />
     {/if}
