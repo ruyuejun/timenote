@@ -11,7 +11,7 @@
 			<button
 				onclick={() => editor.chain().focus().toggleBold().run()}
 				class:active={editor.isActive('bold')}
-				title="加粗"
+				data-tooltip="加粗"
 				aria-label="加粗"
 			>
 				<Bold class="h-4 w-4" />
@@ -20,7 +20,7 @@
 			<button
 				onclick={() => editor.chain().focus().toggleItalic().run()}
 				class:active={editor.isActive('italic')}
-				title="斜体"
+				data-tooltip="斜体"
 				aria-label="斜体"
 			>
 				<Italic class="h-4 w-4" />
@@ -29,24 +29,32 @@
 			<button
 				onclick={() => editor.chain().focus().toggleUnderline().run()}
 				class:active={editor.isActive('underline')}
-				title="下划线"
+				data-tooltip="下划线"
 				aria-label="下划线"
 			>
 				<Underline class="h-4 w-4" />
 			</button>
 
-			<button onclick={() => editor.chain().focus().undo().run()} title="撤销" aria-label="撤销">
+			<button
+				onclick={() => editor.chain().focus().undo().run()}
+				data-tooltip="撤销"
+				aria-label="撤销"
+			>
 				<Undo2 class="h-4 w-4" />
 			</button>
 
-			<button onclick={() => editor.chain().focus().redo().run()} title="重做" aria-label="重做">
+			<button
+				onclick={() => editor.chain().focus().redo().run()}
+				data-tooltip="重做"
+				aria-label="重做"
+			>
 				<Redo2 class="h-4 w-4" />
 			</button>
 		</div>
 
 		{#if onSave}
 			<div class="toolbar-right">
-				<button onclick={onSave} class="save-button" title="保存文件">
+				<button onclick={onSave} class="save-button" data-tooltip="保存文件" aria-label="保存文件">
 					<Save class="h-4 w-4" />
 				</button>
 			</div>
@@ -76,6 +84,7 @@
 		}
 
 		button {
+			position: relative;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -95,6 +104,31 @@
 				background: #0d6efd;
 				color: #fff;
 				border-color: #0d6efd;
+			}
+
+			&[data-tooltip]::after {
+				content: attr(data-tooltip);
+				position: absolute;
+				top: calc(100% + 6px);
+				left: 50%;
+				transform: translateX(-50%);
+				padding: 4px 8px;
+				border-radius: 6px;
+				background: #3f3f46;
+				color: #fff;
+				font-size: 12px;
+				line-height: 1.3;
+				white-space: nowrap;
+				pointer-events: none;
+				opacity: 0;
+				visibility: hidden;
+				transition: opacity 0.12s ease;
+				z-index: 20;
+			}
+
+			&[data-tooltip]:hover::after {
+				opacity: 1;
+				visibility: visible;
 			}
 		}
 

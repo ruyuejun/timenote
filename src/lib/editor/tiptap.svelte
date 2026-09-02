@@ -157,7 +157,8 @@
         .toolbar-sticky {
             position: sticky;
             top: 0;
-            z-index: 1;
+            z-index: 20;
+            overflow: visible;
             flex-shrink: 0; /* 防止被压缩 */
             display: flex;
             gap: 4px;
