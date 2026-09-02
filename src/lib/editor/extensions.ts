@@ -4,6 +4,7 @@ import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { TextStyleKit } from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align'
+import { ListStyle } from './list-style'
 
 export const extensions = [
     StarterKit,
@@ -11,12 +12,16 @@ export const extensions = [
     Underline,
 
     TextStyleKit.configure({
-        lineHeight: false,
+        lineHeight: {
+            types: ['textStyle', 'heading', 'paragraph'],
+        },
     }),
 
     TextAlign.configure({
         types: ['heading', 'paragraph'],
     }),
+
+    ListStyle,
 
     Link.configure({
         openOnClick: false,

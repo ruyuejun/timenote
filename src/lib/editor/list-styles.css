@@ -1,0 +1,120 @@
+/* 编号 / 图形列表：用 data-list-style + 计数器，覆盖浏览器默认 list-style */
+@counter-style editor-circled {
+	system: fixed;
+	symbols: '①' '②' '③' '④' '⑤' '⑥' '⑦' '⑧' '⑨' '⑩' '⑪' '⑫' '⑬' '⑭' '⑮' '⑯' '⑰' '⑱' '⑲' '⑳';
+	suffix: ' ';
+}
+
+.ProseMirror {
+	ol,
+	ul {
+		margin: 0.5em 0;
+		padding-left: 2em;
+	}
+
+	ol {
+		list-style: decimal;
+	}
+
+	ul {
+		list-style: disc;
+	}
+
+	li {
+		margin: 0.15em 0;
+	}
+
+	ol[data-list-style],
+	ul[data-list-style] {
+		list-style: none;
+		counter-reset: editor-list;
+	}
+
+	ol[data-list-style] > li,
+	ul[data-list-style] > li {
+		position: relative;
+		counter-increment: editor-list;
+	}
+
+	ol[data-list-style] > li::before,
+	ul[data-list-style] > li::before {
+		position: absolute;
+		left: -2em;
+		width: 1.85em;
+		text-align: right;
+	}
+
+	ol[data-list-style='cjk-dot'] > li::before {
+		content: counter(editor-list, cjk-ideographic) '、';
+	}
+
+	ol[data-list-style='cjk-paren'] > li::before {
+		content: '（' counter(editor-list, cjk-ideographic) '）';
+		width: 2.1em;
+		left: -2.25em;
+	}
+
+	ol[data-list-style='decimal'] > li::before {
+		content: counter(editor-list) '.';
+	}
+
+	ol[data-list-style='decimal-paren'] > li::before {
+		content: '(' counter(editor-list) ')';
+	}
+
+	ol[data-list-style='circled'] > li::before {
+		content: counter(editor-list, editor-circled);
+	}
+
+	ol[data-list-style='decimal-rparen'] > li::before {
+		content: counter(editor-list) ')';
+	}
+
+	ol[data-list-style='upper-alpha'] > li::before {
+		content: counter(editor-list, upper-alpha) '.';
+	}
+
+	ol[data-list-style='lower-alpha'] > li::before {
+		content: counter(editor-list, lower-alpha) '.';
+	}
+
+	ul[data-list-style='disc'] > li::before {
+		content: '●';
+		font-size: 0.55em;
+		top: 0.45em;
+	}
+
+	ul[data-list-style='square'] > li::before {
+		content: '■';
+		font-size: 0.55em;
+		top: 0.45em;
+	}
+
+	ul[data-list-style='diamond'] > li::before {
+		content: '◆';
+		font-size: 0.55em;
+		top: 0.45em;
+	}
+
+	ul[data-list-style='star'] > li::before {
+		content: '✦';
+		font-size: 0.7em;
+		top: 0.28em;
+	}
+
+	ul[data-list-style='arrow'] > li::before {
+		content: '▸';
+		top: 0.05em;
+	}
+
+	ul[data-list-style='check'] > li::before {
+		content: '✓';
+		top: 0.05em;
+	}
+
+	ul[data-list-style='diamond-outline'] > li::before {
+		content: '◇';
+		font-size: 0.7em;
+		top: 0.28em;
+	}
+}

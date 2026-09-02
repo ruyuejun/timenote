@@ -14,12 +14,21 @@
         TextAlignCenter,
         TextAlignEnd,
         TextAlignJustify,
+        AlignVerticalSpaceAround,
+        ListOrdered,
+        List,
     } from "@lucide/svelte";
     import {
         DEFAULT_FONT,
         FONT_FAMILIES,
         matchFontFamily,
     } from "./font-families";
+    import {
+        BULLET_LIST_STYLES,
+        ORDERED_LIST_STYLES,
+        type BulletListStyleId,
+        type OrderedListStyleId,
+    } from "./list-styles";
 
     const { editor, onSave }: { editor: Editor; onSave?: () => void } =
         $props();
@@ -44,6 +53,17 @@
     ] as const;
 
     const DEFAULT_SIZE = "12pt";
+    const DEFAULT_LINE_HEIGHT = "1.6";
+
+    const LINE_HEIGHTS = [
+        { label: "单倍", value: "1" },
+        { label: "1.15", value: "1.15" },
+        { label: "1.5", value: "1.5" },
+        { label: "1.6", value: "1.6" },
+        { label: "2", value: "2" },
+        { label: "2.5", value: "2.5" },
+        { label: "3", value: "3" },
+    ] as const;
 
     const TEXT_COLORS = [
         "#000000",
@@ -93,11 +113,17 @@
     let colorOpen = $state(false);
     let highlightOpen = $state(false);
     let blockOpen = $state(false);
+    let lineOpen = $state(false);
+    let orderedOpen = $state(false);
+    let bulletOpen = $state(false);
     let sizeWrap = $state<HTMLDivElement | null>(null);
     let fontWrap = $state<HTMLDivElement | null>(null);
     let colorWrap = $state<HTMLDivElement | null>(null);
     let highlightWrap = $state<HTMLDivElement | null>(null);
     let blockWrap = $state<HTMLDivElement | null>(null);
+    let lineWrap = $state<HTMLDivElement | null>(null);
+    let orderedWrap = $state<HTMLDivElement | null>(null);
+    let bulletWrap = $state<HTMLDivElement | null>(null);
     let savedFrom = 1;
     let savedTo = 1;
 
@@ -124,7 +150,10 @@
             !fontOpen &&
             !colorOpen &&
             !highlightOpen &&
-            !blockOpen
+            !blockOpen &&
+            !lineOpen &&
+            !orderedOpen &&
+            !bulletOpen
         )
             return;
         const onPointerDown = (event: PointerEvent) => {
@@ -134,7 +163,10 @@
                 fontWrap?.contains(target) ||
                 colorWrap?.contains(target) ||
                 highlightWrap?.contains(target) ||
-                blockWrap?.contains(target)
+                blockWrap?.contains(target) ||
+                lineWrap?.contains(target) ||
+                orderedWrap?.contains(target) ||
+                bulletWrap?.contains(target)
             )
                 return;
             sizeOpen = false;
@@ -142,6 +174,9 @@
             colorOpen = false;
             highlightOpen = false;
             blockOpen = false;
+            lineOpen = false;
+            orderedOpen = false;
+            bulletOpen = false;
         };
         window.addEventListener("pointerdown", onPointerDown);
         return () => window.removeEventListener("pointerdown", onPointerDown);
@@ -248,13 +283,16 @@
     }
 
     function togglePanel(
-        panel: "size" | "font" | "color" | "highlight" | "block",
+        panel: "size" | "font" | "color" | "highlight" | "block" | "line" | "ordered" | "bullet",
     ) {
         sizeOpen = panel === "size" ? !sizeOpen : false;
         fontOpen = panel === "font" ? !fontOpen : false;
         colorOpen = panel === "color" ? !colorOpen : false;
         highlightOpen = panel === "highlight" ? !highlightOpen : false;
         blockOpen = panel === "block" ? !blockOpen : false;
+        lineOpen = panel === "line" ? !lineOpen : false;
+        orderedOpen = panel === "ordered" ? !orderedOpen : false;
+        bulletOpen = panel === "bullet" ? !bulletOpen : false;
     }
 
     function currentBlockId() {
@@ -308,6 +346,93 @@
             .setTextSelection({ from: savedFrom, to: savedTo })
             .setTextAlign(value)
             .run();
+    }
+
+    function currentLineHeight() {
+        void tick;
+        return (
+            (editor.getAttributes("paragraph").lineHeight as string | undefined) ||
+            (editor.getAttributes("heading").lineHeight as string | undefined) ||
+            (editor.getAttributes("textStyle").lineHeight as string | undefined) ||
+            DEFAULT_LINE_HEIGHT
+        );
+    }
+
+    function setLineHeight(value: string) {
+        editor
+            .chain()
+            .focus()
+            .setTextSelection({ from: savedFrom, to: savedTo })
+            .command(({ commands }) => {
+                commands.updateAttributes("paragraph", { lineHeight: value });
+                commands.updateAttributes("heading", { lineHeight: value });
+                return true;
+            })
+            .setLineHeight(value)
+            .run();
+        lineOpen = false;
+    }
+
+    function currentOrderedStyle(): OrderedListStyleId {
+        void tick;
+        if (!editor.isActive("orderedList")) return "none";
+        return (
+            (editor.getAttributes("orderedList").listStyle as OrderedListStyleId | undefined) ||
+            "decimal"
+        );
+    }
+
+    function currentBulletStyle(): BulletListStyleId {
+        void tick;
+        if (!editor.isActive("bulletList")) return "none";
+        return (
+            (editor.getAttributes("bulletList").listStyle as BulletListStyleId | undefined) ||
+            "disc"
+        );
+    }
+
+    function restoreSelection() {
+        const size = editor.state.doc.content.size;
+        const max = Math.max(1, size - 1);
+        const from = Math.min(Math.max(1, savedFrom), max);
+        const to = Math.min(Math.max(from, savedTo), max);
+        return { from, to };
+    }
+
+    function applyOrderedStyle(id: OrderedListStyleId) {
+        const { from, to } = restoreSelection();
+        const inBullet = editor.isActive("bulletList");
+        const inOrdered = editor.isActive("orderedList");
+        const chain = editor.chain().focus().setTextSelection({ from, to });
+        if (id === "none") {
+            if (inOrdered) chain.toggleOrderedList();
+            chain.run();
+            orderedOpen = false;
+            return;
+        }
+        if (inBullet) chain.toggleBulletList();
+        if (!inOrdered) chain.toggleOrderedList();
+        chain.run();
+        editor.chain().focus().updateAttributes("orderedList", { listStyle: id }).run();
+        orderedOpen = false;
+    }
+
+    function applyBulletStyle(id: BulletListStyleId) {
+        const { from, to } = restoreSelection();
+        const inBullet = editor.isActive("bulletList");
+        const inOrdered = editor.isActive("orderedList");
+        const chain = editor.chain().focus().setTextSelection({ from, to });
+        if (id === "none") {
+            if (inBullet) chain.toggleBulletList();
+            chain.run();
+            bulletOpen = false;
+            return;
+        }
+        if (inOrdered) chain.toggleOrderedList();
+        if (!inBullet) chain.toggleBulletList();
+        chain.run();
+        editor.chain().focus().updateAttributes("bulletList", { listStyle: id }).run();
+        bulletOpen = false;
     }
 </script>
 
@@ -552,6 +677,108 @@
                 </button>
             {/each}
 
+            <div class="dropdown" bind:this={lineWrap}>
+                <button
+                    type="button"
+                    class:open={lineOpen}
+                    onclick={() => togglePanel("line")}
+                    data-tooltip="行间距"
+                    aria-label="行间距"
+                    aria-expanded={lineOpen}
+                >
+                    <AlignVerticalSpaceAround class="h-4 w-4" />
+                </button>
+                {#if lineOpen}
+                    <div class="menu size-menu" role="listbox">
+                        {#each LINE_HEIGHTS as item}
+                            <button
+                                type="button"
+                                class:active={currentLineHeight() === item.value}
+                                onclick={() => setLineHeight(item.value)}
+                            >
+                                {item.label}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+
+            <div class="dropdown" bind:this={bulletWrap}>
+                <button
+                    type="button"
+                    class:open={bulletOpen}
+                    class:active={editor.isActive("bulletList")}
+                    onclick={() => togglePanel("bullet")}
+                    data-tooltip="项目符号"
+                    aria-label="项目符号"
+                    aria-expanded={bulletOpen}
+                >
+                    <List class="h-4 w-4" />
+                </button>
+                {#if bulletOpen}
+                    <div class="menu list-gallery" role="listbox">
+                        <p class="gallery-title">预设样式</p>
+                        {#each BULLET_LIST_STYLES as item}
+                            <button
+                                type="button"
+                                class="list-card"
+                                class:none={item.id === "none"}
+                                class:active={currentBulletStyle() === item.id}
+                                onclick={() => applyBulletStyle(item.id)}
+                            >
+                                {#if item.id === "none"}
+                                    无
+                                {:else}
+                                    {#each [1, 2, 3] as n (n)}
+                                        <span class="list-preview-line"
+                                            ><i>{item.marker}</i><b></b></span
+                                        >
+                                    {/each}
+                                {/if}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+
+            <div class="dropdown" bind:this={orderedWrap}>
+                <button
+                    type="button"
+                    class:open={orderedOpen}
+                    class:active={editor.isActive("orderedList")}
+                    onclick={() => togglePanel("ordered")}
+                    data-tooltip="编号"
+                    aria-label="编号"
+                    aria-expanded={orderedOpen}
+                >
+                    <ListOrdered class="h-4 w-4" />
+                </button>
+                {#if orderedOpen}
+                    <div class="menu list-gallery ordered-gallery" role="listbox">
+                        <p class="gallery-title">编号</p>
+                        {#each ORDERED_LIST_STYLES as item}
+                            <button
+                                type="button"
+                                class="list-card"
+                                class:none={item.id === "none"}
+                                class:active={currentOrderedStyle() === item.id}
+                                onclick={() => applyOrderedStyle(item.id)}
+                            >
+                                {#if item.id === "none"}
+                                    无
+                                {:else}
+                                    {#each item.preview as line}
+                                        <span class="list-preview-line"
+                                            ><em>{line}</em><b></b></span
+                                        >
+                                    {/each}
+                                {/if}
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+
             <button
                 onclick={() => editor.chain().focus().undo().run()}
                 data-tooltip="撤销"
@@ -778,6 +1005,80 @@
             border-radius: 8px;
             background: #fff;
             box-shadow: 0 8px 24px rgba(15, 17, 40, 0.12);
+        }
+
+        .list-gallery {
+            display: grid;
+            grid-template-columns: repeat(4, 68px);
+            gap: 8px;
+            width: auto;
+            padding: 10px;
+            min-width: 0;
+
+            .gallery-title {
+                grid-column: 1 / -1;
+                margin: 0 0 2px;
+                font-size: 12px;
+                color: #6b7280;
+                text-align: left;
+            }
+
+            .list-card {
+                width: 68px;
+                height: 64px;
+                flex-direction: column;
+                align-items: stretch;
+                justify-content: center;
+                gap: 3px;
+                padding: 6px 8px;
+                border: 1px solid #e5e7eb;
+                border-radius: 4px;
+                background: #fff;
+
+                &.none {
+                    align-items: center;
+                    font-size: 13px;
+                    color: #6b7280;
+                }
+
+                &.active {
+                    border-color: #6366f1;
+                    box-shadow: 0 0 0 1px #6366f1;
+                    background: #fff;
+                    color: inherit;
+                }
+
+                .list-preview-line {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    min-width: 0;
+                }
+
+                em,
+                i {
+                    flex: none;
+                    font-style: normal;
+                    font-size: 10px;
+                    line-height: 1;
+                    color: #374151;
+                }
+
+                b {
+                    display: block;
+                    flex: 1;
+                    height: 1px;
+                    background: #9ca3af;
+                }
+            }
+        }
+
+        .ordered-gallery {
+            grid-template-columns: repeat(3, 76px);
+
+            .list-card {
+                width: 76px;
+            }
         }
 
         .size-menu {

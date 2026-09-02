@@ -7,8 +7,10 @@
     import { TextStyleKit } from '@tiptap/extension-text-style'
     import TextAlign from '@tiptap/extension-text-align'
     import Toolbar from './toolbar.svelte'
+    import { ListStyle } from './list-style'
     import { DEFAULT_FONT } from './font-families'
     import './editor-fonts.css'
+    import './list-styles.css'
 
     // ---------- 组件 Props ----------
     const {
@@ -31,11 +33,14 @@
                 StarterKit,
                 Underline,
                 TextStyleKit.configure({
-                    lineHeight: false,
+                    lineHeight: {
+                        types: ['textStyle', 'heading', 'paragraph'],
+                    },
                 }),
                 TextAlign.configure({
                     types: ['heading', 'paragraph'],
                 }),
+                ListStyle,
                 BubbleMenu.configure({
                     element: bubbleMenuElement,
                     shouldShow: ({ from, to }: { state: any; from: number; to: number }) => {
