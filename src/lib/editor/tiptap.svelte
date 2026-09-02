@@ -4,7 +4,11 @@
     import { StarterKit } from '@tiptap/starter-kit'
     import { BubbleMenu } from '@tiptap/extension-bubble-menu'
     import Underline from '@tiptap/extension-underline'
+    import { TextStyleKit } from '@tiptap/extension-text-style'
+    import TextAlign from '@tiptap/extension-text-align'
     import Toolbar from './toolbar.svelte'
+    import { DEFAULT_FONT } from './font-families'
+    import './editor-fonts.css'
 
     // ---------- 组件 Props ----------
     const {
@@ -25,7 +29,13 @@
             element: editorElement,
             extensions: [
                 StarterKit,
-                Underline, // 启用下划线
+                Underline,
+                TextStyleKit.configure({
+                    lineHeight: false,
+                }),
+                TextAlign.configure({
+                    types: ['heading', 'paragraph'],
+                }),
                 BubbleMenu.configure({
                     element: bubbleMenuElement,
                     shouldShow: ({ from, to }: { state: any; from: number; to: number }) => {
@@ -79,7 +89,7 @@
 </script>
 
 <!-- ---------- 模板 ---------- -->
-<div class="editor-wrapper">
+<div class="editor-wrapper" style:font-family={DEFAULT_FONT}>
     {#if editor}
         <div class="toolbar-sticky">
             <Toolbar {editor} {onSave} />
@@ -110,7 +120,6 @@
     $radius: 6px;
 
     .editor-wrapper {
-        font-family: system-ui, sans-serif;
         display: grid;
         grid-template-rows: auto minmax(0, 1fr);
         flex: 1 1 0;
@@ -127,6 +136,7 @@
             border-radius: $radius;
             outline: none;
             background: #fff;
+            font-family: inherit;
             transition: border-color 0.2s;
 
             &:focus {
@@ -140,8 +150,14 @@
                 margin: 0.5em 0;
             }
 
-            h2 {
-                font-size: 1.4rem;
+            h3 {
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin: 0.5em 0;
+            }
+
+            h4, h5, h6 {
+                font-size: 1.05rem;
                 font-weight: 600;
                 margin: 0.5em 0;
             }
@@ -149,6 +165,13 @@
             p {
                 margin: 0.5em 0;
                 line-height: 1.6;
+            }
+
+            /* 中文两端对齐：浏览器默认 justify 只处理英文空格，最后一行也不拉开 */
+            [style*='text-align: justify'] {
+                text-align: justify;
+                text-justify: inter-character;
+                text-align-last: justify;
             }
         }
     }
