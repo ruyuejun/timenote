@@ -17,6 +17,8 @@
         AlignVerticalSpaceAround,
         ListOrdered,
         List,
+        Superscript,
+        Subscript,
     } from "@lucide/svelte";
     import {
         DEFAULT_FONT,
@@ -546,6 +548,26 @@
                 <Underline class="h-4 w-4" />
             </button>
 
+            <button
+                type="button"
+                class:active={editor.isActive("superscript")}
+                onclick={() => editor.chain().focus().toggleSuperscript().run()}
+                data-tooltip="上标"
+                aria-label="上标"
+            >
+                <Superscript class="h-4 w-4" />
+            </button>
+
+            <button
+                type="button"
+                class:active={editor.isActive("subscript")}
+                onclick={() => editor.chain().focus().toggleSubscript().run()}
+                data-tooltip="下标"
+                aria-label="下标"
+            >
+                <Subscript class="h-4 w-4" />
+            </button>
+
             <div class="dropdown" bind:this={colorWrap}>
                 <button
                     type="button"
@@ -870,7 +892,9 @@
             &.active:is(
                     [aria-label="加粗"],
                     [aria-label="斜体"],
-                    [aria-label="下划线"]
+                    [aria-label="下划线"],
+                    [aria-label="上标"],
+                    [aria-label="下标"]
                 ) {
                 background: #0d6efd;
                 color: #fff;

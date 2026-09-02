@@ -1,5 +1,6 @@
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
+import { Superscript, Subscript } from './script-marks'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { TextStyleKit } from '@tiptap/extension-text-style'
@@ -10,6 +11,8 @@ export const extensions = [
     StarterKit,
 
     Underline,
+    Superscript,
+    Subscript,
 
     TextStyleKit.configure({
         lineHeight: {

@@ -4,6 +4,7 @@
     import { StarterKit } from '@tiptap/starter-kit'
     import { BubbleMenu } from '@tiptap/extension-bubble-menu'
     import Underline from '@tiptap/extension-underline'
+    import { Superscript, Subscript } from './script-marks'
     import { TextStyleKit } from '@tiptap/extension-text-style'
     import TextAlign from '@tiptap/extension-text-align'
     import Toolbar from './toolbar.svelte'
@@ -32,6 +33,8 @@
             extensions: [
                 StarterKit,
                 Underline,
+                Superscript,
+                Subscript,
                 TextStyleKit.configure({
                     lineHeight: {
                         types: ['textStyle', 'heading', 'paragraph'],
