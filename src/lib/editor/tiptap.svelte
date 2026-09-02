@@ -7,6 +7,9 @@
     import { Superscript, Subscript } from './script-marks'
     import { TextStyleKit } from '@tiptap/extension-text-style'
     import TextAlign from '@tiptap/extension-text-align'
+    import Image from '@tiptap/extension-image'
+    import Link from '@tiptap/extension-link'
+    import { TableKit } from '@tiptap/extension-table'
     import Toolbar from './toolbar.svelte'
     import { ListStyle } from './list-style'
     import { DEFAULT_FONT } from './font-families'
@@ -44,6 +47,17 @@
                     types: ['heading', 'paragraph'],
                 }),
                 ListStyle,
+                Image.configure({
+                    allowBase64: true,
+                }),
+                Link.configure({
+                    openOnClick: false,
+                    autolink: true,
+                    defaultProtocol: 'https',
+                }),
+                TableKit.configure({
+                    table: { resizable: true },
+                }),
                 BubbleMenu.configure({
                     element: bubbleMenuElement,
                     shouldShow: ({ from, to }: { state: any; from: number; to: number }) => {
@@ -175,6 +189,42 @@
                 line-height: 1.6;
             }
 
+            img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 4px;
+            }
+
+            a {
+                color: #2563eb;
+                text-decoration: underline;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin: 0.5em 0;
+                table-layout: fixed;
+            }
+
+            th,
+            td {
+                border: 1px solid #d1d5db;
+                padding: 6px 10px;
+                min-width: 48px;
+                vertical-align: top;
+            }
+
+            th {
+                background: #f3f4f6;
+                font-weight: 600;
+            }
+
+            .tableWrapper {
+                overflow-x: auto;
+                margin: 0.5em 0;
+            }
+
             /* 中文两端对齐：浏览器默认 justify 只处理英文空格，最后一行也不拉开 */
             [style*='text-align: justify'] {
                 text-align: justify;
@@ -188,7 +238,7 @@
         .toolbar-sticky {
             position: sticky;
             top: 0;
-            z-index: 20;
+            z-index: 50;
             overflow: visible;
             flex-shrink: 0; /* 防止被压缩 */
             display: flex;
@@ -203,6 +253,8 @@
         }
 
         .editor-scroll-container {
+            position: relative;
+            z-index: 0;
             min-height: 0;
             height: 100%;
             overflow-x: hidden;

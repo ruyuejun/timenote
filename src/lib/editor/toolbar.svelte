@@ -19,6 +19,9 @@
         List,
         Superscript,
         Subscript,
+        Table,
+        Image,
+        Link,
     } from "@lucide/svelte";
     import {
         DEFAULT_FONT,
@@ -31,6 +34,7 @@
         type BulletListStyleId,
         type OrderedListStyleId,
     } from "./list-styles";
+    import LinkDialog from "./link-dialog.svelte";
 
     const { editor, onSave }: { editor: Editor; onSave?: () => void } =
         $props();
@@ -118,6 +122,12 @@
     let lineOpen = $state(false);
     let orderedOpen = $state(false);
     let bulletOpen = $state(false);
+    let tableOpen = $state(false);
+    let linkOpen = $state(false);
+    let linkText = $state("");
+    let linkHref = $state("");
+    let tableHover = $state({ rows: 0, cols: 0 });
+    let imageInput = $state<HTMLInputElement | null>(null);
     let sizeWrap = $state<HTMLDivElement | null>(null);
     let fontWrap = $state<HTMLDivElement | null>(null);
     let colorWrap = $state<HTMLDivElement | null>(null);
@@ -126,6 +136,7 @@
     let lineWrap = $state<HTMLDivElement | null>(null);
     let orderedWrap = $state<HTMLDivElement | null>(null);
     let bulletWrap = $state<HTMLDivElement | null>(null);
+    let tableWrap = $state<HTMLDivElement | null>(null);
     let savedFrom = 1;
     let savedTo = 1;
 
@@ -155,7 +166,8 @@
             !blockOpen &&
             !lineOpen &&
             !orderedOpen &&
-            !bulletOpen
+            !bulletOpen &&
+            !tableOpen
         )
             return;
         const onPointerDown = (event: PointerEvent) => {
@@ -168,7 +180,8 @@
                 blockWrap?.contains(target) ||
                 lineWrap?.contains(target) ||
                 orderedWrap?.contains(target) ||
-                bulletWrap?.contains(target)
+                bulletWrap?.contains(target) ||
+                tableWrap?.contains(target)
             )
                 return;
             sizeOpen = false;
@@ -179,6 +192,7 @@
             lineOpen = false;
             orderedOpen = false;
             bulletOpen = false;
+            tableOpen = false;
         };
         window.addEventListener("pointerdown", onPointerDown);
         return () => window.removeEventListener("pointerdown", onPointerDown);
@@ -285,7 +299,16 @@
     }
 
     function togglePanel(
-        panel: "size" | "font" | "color" | "highlight" | "block" | "line" | "ordered" | "bullet",
+        panel:
+            | "size"
+            | "font"
+            | "color"
+            | "highlight"
+            | "block"
+            | "line"
+            | "ordered"
+            | "bullet"
+            | "table",
     ) {
         sizeOpen = panel === "size" ? !sizeOpen : false;
         fontOpen = panel === "font" ? !fontOpen : false;
@@ -295,6 +318,8 @@
         lineOpen = panel === "line" ? !lineOpen : false;
         orderedOpen = panel === "ordered" ? !orderedOpen : false;
         bulletOpen = panel === "bullet" ? !bulletOpen : false;
+        tableOpen = panel === "table" ? !tableOpen : false;
+        if (tableOpen) tableHover = { rows: 0, cols: 0 };
     }
 
     function currentBlockId() {
@@ -353,9 +378,15 @@
     function currentLineHeight() {
         void tick;
         return (
-            (editor.getAttributes("paragraph").lineHeight as string | undefined) ||
-            (editor.getAttributes("heading").lineHeight as string | undefined) ||
-            (editor.getAttributes("textStyle").lineHeight as string | undefined) ||
+            (editor.getAttributes("paragraph").lineHeight as
+                | string
+                | undefined) ||
+            (editor.getAttributes("heading").lineHeight as
+                | string
+                | undefined) ||
+            (editor.getAttributes("textStyle").lineHeight as
+                | string
+                | undefined) ||
             DEFAULT_LINE_HEIGHT
         );
     }
@@ -379,8 +410,9 @@
         void tick;
         if (!editor.isActive("orderedList")) return "none";
         return (
-            (editor.getAttributes("orderedList").listStyle as OrderedListStyleId | undefined) ||
-            "decimal"
+            (editor.getAttributes("orderedList").listStyle as
+                | OrderedListStyleId
+                | undefined) || "decimal"
         );
     }
 
@@ -388,8 +420,9 @@
         void tick;
         if (!editor.isActive("bulletList")) return "none";
         return (
-            (editor.getAttributes("bulletList").listStyle as BulletListStyleId | undefined) ||
-            "disc"
+            (editor.getAttributes("bulletList").listStyle as
+                | BulletListStyleId
+                | undefined) || "disc"
         );
     }
 
@@ -415,7 +448,11 @@
         if (inBullet) chain.toggleBulletList();
         if (!inOrdered) chain.toggleOrderedList();
         chain.run();
-        editor.chain().focus().updateAttributes("orderedList", { listStyle: id }).run();
+        editor
+            .chain()
+            .focus()
+            .updateAttributes("orderedList", { listStyle: id })
+            .run();
         orderedOpen = false;
     }
 
@@ -433,15 +470,117 @@
         if (inOrdered) chain.toggleOrderedList();
         if (!inBullet) chain.toggleBulletList();
         chain.run();
-        editor.chain().focus().updateAttributes("bulletList", { listStyle: id }).run();
+        editor
+            .chain()
+            .focus()
+            .updateAttributes("bulletList", { listStyle: id })
+            .run();
         bulletOpen = false;
+    }
+
+    function insertTable(rows: number, cols: number) {
+        const { from, to } = restoreSelection();
+        editor
+            .chain()
+            .focus()
+            .setTextSelection({ from, to })
+            .insertTable({ rows, cols, withHeaderRow: true })
+            .run();
+        tableOpen = false;
+    }
+
+    function pickImage() {
+        imageInput?.click();
+    }
+
+    function onImagePicked(event: Event) {
+        const input = event.currentTarget as HTMLInputElement;
+        const file = input.files?.[0];
+        input.value = "";
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const src = reader.result;
+            if (typeof src !== "string") return;
+            const { from, to } = restoreSelection();
+            editor
+                .chain()
+                .focus()
+                .setTextSelection({ from, to })
+                .setImage({ src, alt: file.name })
+                .run();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function openLinkDialog() {
+        const { from, to } = restoreSelection();
+        linkText = editor.state.doc.textBetween(from, to, "");
+        linkHref =
+            (editor.getAttributes("link").href as string | undefined) || "";
+        linkOpen = true;
+    }
+
+    function confirmLink(text: string, href: string) {
+        let url = href.trim();
+        if (!/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(url)) url = `https://${url}`;
+        const { from, to } = restoreSelection();
+        editor
+            .chain()
+            .focus()
+            .setTextSelection({ from, to })
+            .deleteSelection()
+            .insertContent({
+                type: "text",
+                text,
+                marks: [{ type: "link", attrs: { href: url } }],
+            })
+            .run();
+        linkOpen = false;
     }
 </script>
 
 {#if editor}
-	<div class="toolbar-inner" role="toolbar" tabindex="-1" onpointerdown={rememberSelection}>
-        <div class="toolbar-left">
-            <div class="dropdown" bind:this={fontWrap}>
+    <div
+        class="toolbar-inner flex flex-wrap items-center justify-between gap-1"
+        role="toolbar"
+        tabindex="-1"
+        onpointerdown={rememberSelection}
+    >
+        {#if onSave}
+            <div class="flex flex-wrap items-center gap-1">
+                <button
+                    onclick={onSave}
+                    class="save-button"
+                    data-tooltip="保存文件"
+                    aria-label="保存文件"
+                >
+                    <Save class="h-4 w-4" />
+                </button>
+            </div>
+        {/if}
+        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            <button
+                onclick={() => editor.chain().focus().undo().run()}
+                data-tooltip="撤销"
+                aria-label="撤销"
+            >
+                <Undo2 class="h-4 w-4" />
+            </button>
+
+            <button
+                onclick={() => editor.chain().focus().redo().run()}
+                data-tooltip="重做"
+                aria-label="重做"
+            >
+                <Redo2 class="h-4 w-4" />
+            </button>
+            <div
+                class="mx-1 h-[18px] w-px shrink-0 self-center bg-ink-300"
+                aria-hidden="true"
+            ></div>
+
+            <div class="relative" bind:this={fontWrap}>
                 <button
                     type="button"
                     class="font-trigger"
@@ -471,7 +610,7 @@
                 {/if}
             </div>
 
-            <div class="dropdown" bind:this={sizeWrap}>
+            <div class="relative" bind:this={sizeWrap}>
                 <button
                     type="button"
                     class="size-trigger"
@@ -568,7 +707,7 @@
                 <Subscript class="h-4 w-4" />
             </button>
 
-            <div class="dropdown" bind:this={colorWrap}>
+            <div class="relative" bind:this={colorWrap}>
                 <button
                     type="button"
                     class="swatch-trigger"
@@ -612,7 +751,7 @@
                 {/if}
             </div>
 
-            <div class="dropdown" bind:this={highlightWrap}>
+            <div class="relative" bind:this={highlightWrap}>
                 <button
                     type="button"
                     class="swatch-trigger"
@@ -652,9 +791,12 @@
                 {/if}
             </div>
 
-            <div class="divider" aria-hidden="true"></div>
+            <div
+                class="mx-1 h-[18px] w-px shrink-0 self-center bg-ink-300"
+                aria-hidden="true"
+            ></div>
 
-            <div class="dropdown" bind:this={blockWrap}>
+            <div class="relative" bind:this={blockWrap}>
                 <button
                     type="button"
                     class="block-trigger"
@@ -699,7 +841,7 @@
                 </button>
             {/each}
 
-            <div class="dropdown" bind:this={lineWrap}>
+            <div class="relative" bind:this={lineWrap}>
                 <button
                     type="button"
                     class:open={lineOpen}
@@ -715,7 +857,8 @@
                         {#each LINE_HEIGHTS as item}
                             <button
                                 type="button"
-                                class:active={currentLineHeight() === item.value}
+                                class:active={currentLineHeight() ===
+                                    item.value}
                                 onclick={() => setLineHeight(item.value)}
                             >
                                 {item.label}
@@ -725,7 +868,7 @@
                 {/if}
             </div>
 
-            <div class="dropdown" bind:this={bulletWrap}>
+            <div class="relative" bind:this={bulletWrap}>
                 <button
                     type="button"
                     class:open={bulletOpen}
@@ -763,7 +906,7 @@
                 {/if}
             </div>
 
-            <div class="dropdown" bind:this={orderedWrap}>
+            <div class="relative" bind:this={orderedWrap}>
                 <button
                     type="button"
                     class:open={orderedOpen}
@@ -776,7 +919,10 @@
                     <ListOrdered class="h-4 w-4" />
                 </button>
                 {#if orderedOpen}
-                    <div class="menu list-gallery ordered-gallery" role="listbox">
+                    <div
+                        class="menu list-gallery ordered-gallery"
+                        role="listbox"
+                    >
                         <p class="gallery-title">编号</p>
                         {#each ORDERED_LIST_STYLES as item}
                             <button
@@ -801,62 +947,87 @@
                 {/if}
             </div>
 
-            <button
-                onclick={() => editor.chain().focus().undo().run()}
-                data-tooltip="撤销"
-                aria-label="撤销"
-            >
-                <Undo2 class="h-4 w-4" />
-            </button>
+            <div class="mx-1 h-[18px] w-px shrink-0 self-center bg-ink-300" aria-hidden="true"></div>
+
+            <div class="relative" bind:this={tableWrap}>
+                <button
+                    type="button"
+                    class:open={tableOpen}
+                    class:active={editor.isActive("table")}
+                    onclick={() => togglePanel("table")}
+                    data-tooltip="表格"
+                    aria-label="表格"
+                    aria-expanded={tableOpen}
+                >
+                    <Table class="h-4 w-4" />
+                </button>
+                {#if tableOpen}
+                    <div class="menu table-picker" role="listbox">
+                        <p class="gallery-title">
+                            {tableHover.rows && tableHover.cols
+                                ? `${tableHover.rows} × ${tableHover.cols}`
+                                : "插入表格"}
+                        </p>
+                        <div class="table-grid">
+                            {#each Array.from({ length: 6 }, (_, r) => r + 1) as row}
+                                {#each Array.from({ length: 6 }, (_, c) => c + 1) as col}
+                                    <button
+                                        type="button"
+                                        class="table-cell"
+                                        class:hot={row <= tableHover.rows &&
+                                            col <= tableHover.cols}
+                                        aria-label={`${row} 行 ${col} 列`}
+                                        onpointerenter={() =>
+                                            (tableHover = { rows: row, cols: col })}
+                                        onclick={() => insertTable(row, col)}
+                                    ></button>
+                                {/each}
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+            </div>
 
             <button
-                onclick={() => editor.chain().focus().redo().run()}
-                data-tooltip="重做"
-                aria-label="重做"
+                type="button"
+                data-tooltip="图片"
+                aria-label="图片"
+                onclick={pickImage}
             >
-                <Redo2 class="h-4 w-4" />
+                <Image class="h-4 w-4" />
+            </button>
+            <input
+                bind:this={imageInput}
+                type="file"
+                accept="image/*"
+                class="hidden"
+                onchange={onImagePicked}
+            />
+
+            <button
+                type="button"
+                class:active={editor.isActive("link")}
+                data-tooltip="超链接"
+                aria-label="超链接"
+                onclick={openLinkDialog}
+            >
+                <Link class="h-4 w-4" />
             </button>
         </div>
-
-        {#if onSave}
-            <div class="toolbar-right">
-                <button
-                    onclick={onSave}
-                    class="save-button"
-                    data-tooltip="保存文件"
-                    aria-label="保存文件"
-                >
-                    <Save class="h-4 w-4" />
-                </button>
-            </div>
-        {/if}
     </div>
+
+    <LinkDialog
+        open={linkOpen}
+        text={linkText}
+        href={linkHref}
+        onConfirm={confirmLink}
+        onCancel={() => (linkOpen = false)}
+    />
 {/if}
 
 <style lang="scss">
     .toolbar-inner {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 4px;
-        flex-wrap: wrap;
-
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-
-        .toolbar-right {
-            display: flex;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-
-        .dropdown {
-            position: relative;
-
+        .relative {
             &:has(.menu) > button[data-tooltip]::after {
                 display: none;
             }
@@ -927,14 +1098,6 @@
             }
         }
 
-        .divider {
-            width: 1px;
-            height: 18px;
-            margin: 0 4px;
-            background: #d1d5db;
-            flex-shrink: 0;
-        }
-
         .size-trigger {
             min-width: 58px;
             gap: 2px;
@@ -943,8 +1106,6 @@
         }
 
         .font-trigger {
-            min-width: 108px;
-            max-width: 148px;
             gap: 2px;
             padding: 4px 6px;
             font-size: 13px;
@@ -1032,10 +1193,13 @@
         }
 
         .list-gallery {
+            left: auto;
+            right: 0;
+            z-index: 50;
             display: grid;
             grid-template-columns: repeat(4, 68px);
             gap: 8px;
-            width: auto;
+            width: max-content;
             padding: 10px;
             min-width: 0;
 
@@ -1102,6 +1266,44 @@
 
             .list-card {
                 width: 76px;
+            }
+        }
+
+        .table-picker {
+            left: auto;
+            right: 0;
+            z-index: 50;
+            width: max-content;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            .gallery-title {
+                margin: 0;
+                font-size: 12px;
+                color: #6b7280;
+                text-align: left;
+            }
+
+            .table-grid {
+                display: grid;
+                grid-template-columns: repeat(6, 16px);
+                gap: 3px;
+            }
+
+            .table-cell {
+                width: 16px;
+                height: 16px;
+                padding: 0;
+                border: 1px solid #d1d5db;
+                border-radius: 2px;
+                background: #fff;
+
+                &.hot {
+                    background: #e0e7ff;
+                    border-color: #6366f1;
+                }
             }
         }
 
