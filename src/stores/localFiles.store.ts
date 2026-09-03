@@ -33,6 +33,9 @@ function createLocalFilesStore() {
                 }]
             })
         },
+        removePath: (filePath: string) => {
+            update(directories => directories.filter(item => item.path !== filePath))
+        },
         addDirectory: (path: string) => {
             update(directories => {
                 if (directories.some(item => item.path === path)) {

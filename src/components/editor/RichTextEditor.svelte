@@ -29,7 +29,9 @@
 <div class="editor-container">
     {#if currentTab}
         <div class="editor-content">
-            <Tiptap content={currentTab.content} onUpdate={handleEditorUpdate} {onSave} />
+            {#key currentTab.id}
+                <Tiptap content={currentTab.content} onUpdate={handleEditorUpdate} {onSave} />
+            {/key}
         </div>
     {:else}
         <div class="empty-editor">

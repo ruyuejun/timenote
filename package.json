@@ -42,8 +42,11 @@
         "@tiptap/extension-underline": "^3.30.0",
         "@tiptap/pm": "^3.30.0",
         "@tiptap/starter-kit": "^3.30.0",
+        "marked": "^18.0.11",
         "sass": "^1.102.0",
-        "tailwind-merge": "^3.6.0"
+        "tailwind-merge": "^3.6.0",
+        "turndown": "^7.2.4",
+        "turndown-plugin-gfm": "^1.0.2"
     },
     "devDependencies": {
         "@playwright/test": "^1.62.1",
@@ -54,6 +57,7 @@
         "@tailwindcss/vite": "^4.3.3",
         "@tsconfig/svelte": "^5.0.8",
         "@types/node": "^26.2.0",
+        "@types/turndown": "^5.0.6",
         "autoprefixer": "^10.5.4",
         "commitizen": "^4.3.2",
         "commitlint": "^21.2.2",

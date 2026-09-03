@@ -13,6 +13,7 @@
     import Toolbar from './toolbar.svelte'
     import { ListStyle } from './list-style'
     import { DEFAULT_FONT } from './font-families'
+    import { toEditorHtml } from './html-markdown'
     import './editor-fonts.css'
     import './list-styles.css'
 
@@ -66,7 +67,7 @@
                     },
                 } as any),
             ],
-            content: content,
+            content: toEditorHtml(content),
             onUpdate: ({ editor }) => {
                 if (onUpdate) {
                     onUpdate(editor)
@@ -83,13 +84,6 @@
     onDestroy(() => {
         editor?.destroy()
         editor = null
-    })
-
-    // 监听 content 变化，更新编辑器内容
-    $effect(() => {
-        if (editor && content !== editor.getHTML()) {
-            editor.commands.setContent(content)
-        }
     })
 
     // ---------- 辅助方法 ----------
