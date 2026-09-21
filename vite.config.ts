@@ -121,38 +121,18 @@ export default defineConfig(({ mode }) => {
                       },
                   }),
         ],
-        css: {
-            preprocessorOptions: {
-                scss: {
-                    additionalData: `@use "@/assets/variables.scss" as *;`,
-                },
-            },
-        },
-        // build: {
-        //     outDir: join(__dirname, 'dist'),
-        //     emptyOutDir: true,
-        // },
         server: {
-            port: 4000,
+            port: 5173,
             host: '0.0.0.0',
             headers: {
                 'Access-Control-Allow-Origin': '*',
             },
             cors: true,
             proxy: {
-                '/api': {
-                    target: env.VITE_HOST,
-                    ws: false,
-                    secure: false,
+                '/api/v1': {
+                    target: env.VITE_API_TARGET || 'http://127.0.0.1:3100',
                     changeOrigin: true,
-                },
-                '/ws/connect': {
-                    target: env.VITE_HOST_MSGWS,
-                    changeOrigin: true,
-                    ws: true, // Required for the WebSocket handshake to succeed
                     secure: false,
-                    // Optional: remove the proxy prefix from the path if needed
-                    // rewrite: (path) => path.replace(/^\/ws-proxy/, ''),
                 },
             },
         },

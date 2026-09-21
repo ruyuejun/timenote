@@ -1,0 +1,16 @@
+:root {
+        --sidebar-bg: #f5f6f7;
+        --sidebar-border: #e8eaed;
+        --header-h: 56px;
+        --primary: #3370ff;
+        --text: #1f2329;
+        --muted: #646a73;
+        font-family:
+                "PingFang SC",
+                "Microsoft YaHei",
+                system-ui,
+                -apple-system,
+                sans-serif;
+        color: var(--text);
+        background: #fff;
+}

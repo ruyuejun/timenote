@@ -1,31 +1,33 @@
 <script lang="ts">
-    import { onMount } from 'svelte'
-    import RichTextEditor from '@/components/editor/RichTextEditor.svelte'
-    import StartupPage from '@/views/startup/StartupPage.svelte'
-    import { activeTab } from '@/stores/editor.store'
-    import { isSaveHotkey, saveActiveDocument } from '$lib/editor/save-document'
+	import { onMount } from 'svelte'
+	import { getToken, setOnAuthExpired, setToken } from '@/api/request'
+	import ToastHost from '$lib/ui/ToastHost.svelte'
+	import { logout } from '@/stores/auth'
+	import { session } from '@/stores/session'
+	import AppLayout from '@/views/app-layout.svelte'
+	import LoginPage from '@/views/login-page.svelte'
+	import '@fontsource-variable/noto-sans-sc/index.css'
+	import 'prosemirror-tables/style/tables.css'
+	import '@/assets/styles/index.scss'
 
-    let currentTab = $state($activeTab)
+	onMount(() => {
+		const token = $session?.token || getToken()
+		if (token) setToken(token)
+		else session.set(null)
 
-    activeTab.subscribe(tab => {
-        currentTab = tab
-    })
+		setOnAuthExpired(() => logout())
+		return () => setOnAuthExpired(null)
+	})
 
-    onMount(() => {
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (!isSaveHotkey(event)) return
-            event.preventDefault()
-            void saveActiveDocument()
-        }
-        window.addEventListener('keydown', onKeyDown, true)
-        return () => window.removeEventListener('keydown', onKeyDown, true)
-    })
+	$effect(() => {
+		if ($session?.token) setToken($session.token)
+	})
 </script>
 
-<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
-    {#if currentTab}
-        <RichTextEditor onSave={saveActiveDocument} />
-    {:else}
-        <StartupPage />
-    {/if}
-</div>
+{#if $session?.token}
+	<AppLayout />
+{:else}
+	<LoginPage />
+{/if}
+
+<ToastHost />
